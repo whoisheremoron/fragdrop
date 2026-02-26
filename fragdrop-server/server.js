@@ -3,6 +3,7 @@
 const express       = require('express');
 const cookieParser  = require('cookie-parser');
 const session       = require('express-session');
+const SqliteStore   = require('better-sqlite3-session-store')(session);
 const passport      = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
 const rateLimit     = require('express-rate-limit');
@@ -37,6 +38,7 @@ app.use(session({
   secret: CONFIG.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: new SqliteStore({ client: DB.db }),
   cookie: { httpOnly: true, sameSite: 'lax', maxAge: 365 * 24 * 60 * 60 * 1000 },
 }));
 app.use(passport.initialize());
