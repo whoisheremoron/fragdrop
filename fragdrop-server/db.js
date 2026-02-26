@@ -10,12 +10,11 @@ const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// Шаг 1: создаём таблицы БЕЗ Steam-колонок (IF NOT EXISTS — не трогает старую БД)
 db.exec(`
   CREATE TABLE IF NOT EXISTS players (
     session_id      TEXT PRIMARY KEY,
-    steam_id        TEXT UNIQUE,
     nick            TEXT NOT NULL DEFAULT 'Игрок',
-    steam_avatar    TEXT,
     balance         REAL NOT NULL DEFAULT 0,
     total_deposited REAL NOT NULL DEFAULT 0,
     cases_opened    INTEGER NOT NULL DEFAULT 0,
@@ -49,13 +48,16 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_inv_session  ON inventory(session_id);
   CREATE INDEX IF NOT EXISTS idx_hist_session ON history(session_id, ts DESC);
-  CREATE INDEX IF NOT EXISTS idx_steam        ON players(steam_id);
 `);
 
-// Миграция для существующих БД
+// Шаг 2: миграция — добавляем Steam-колонки если их нет в старой БД
 const cols = db.prepare("PRAGMA table_info(players)").all().map(c => c.name);
 if (!cols.includes('steam_id'))     db.exec("ALTER TABLE players ADD COLUMN steam_id TEXT");
 if (!cols.includes('steam_avatar')) db.exec("ALTER TABLE players ADD COLUMN steam_avatar TEXT");
+
+// Шаг 3: индекс по steam_id — только после того как колонка точно есть
+// WHERE steam_id IS NOT NULL — частичный индекс, не конфликтует с NULL у не-Steam игроков
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_steam ON players(steam_id) WHERE steam_id IS NOT NULL;`);
 
 const stmts = {
   getPlayer:        db.prepare('SELECT * FROM players WHERE session_id = ?'),
