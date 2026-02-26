@@ -568,12 +568,12 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
       <button class="nav-btn" id="nb-profile" onclick="nav('profile')">Профиль</button>
     </nav>
     <div class="hdr-right">
-      <div class="bal" onclick="openDep()"><span class="bal-val" id="balVal">0.00₽</span></div>
-      <button class="dep-btn" onclick="openDep()">+ Пополнить</button>
-      <div id="steam-auth-block">
-        <!-- Заполняется из /api/state -->
+      <div id="hdr-bal-area" style="display:none;align-items:center;gap:10px;">
+        <div class="bal" onclick="openDep()"><span class="bal-val" id="balVal">0.00₽</span></div>
+        <button class="dep-btn" onclick="openDep()">+ Пополнить</button>
       </div>
-      <div class="avatar" id="ava">?</div>
+      <div id="steam-auth-block"></div>
+      <div class="avatar" id="ava" style="display:none;">?</div>
       <button class="mob-nav-toggle" id="mob-toggle" onclick="toggleMobNav()">☰</button>
     </div>
   </div>
@@ -588,6 +588,29 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
   <button class="mob-nav-btn" id="mob-nb-profile" onclick="nav('profile');closeMobNav()">Профиль</button>
   <div style="margin-top:auto;padding-top:20px;border-top:1px solid var(--border);">
     <button class="dep-btn" style="width:100%;padding:12px;font-size:15px;" onclick="openDep();closeMobNav()">Пополнить баланс</button>
+  </div>
+</div>
+
+
+<!-- LOGIN OVERLAY — показывается незалогиненным -->
+<div id="login-overlay" style="display:none;position:fixed;inset:0;z-index:1000;
+  background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:900;
+    letter-spacing:3px;background:linear-gradient(135deg,#e8a020,#ff5722);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;">FRAG<span style="-webkit-text-fill-color:#dde1f0">DROP</span></div>
+  <div style="color:var(--text2);font-size:15px;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;">
+    CS2 КЕЙСЫ · АПГРЕЙД · КОНТРАКТЫ
+  </div>
+  <a id="login-steam-btn" href="/auth/steam" style="display:flex;align-items:center;gap:10px;
+    background:#1b2838;border:2px solid #4a90d9;color:#c6d4df;
+    font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;
+    padding:14px 32px;border-radius:12px;text-decoration:none;letter-spacing:1px;
+    transition:all .2s;margin-top:8px;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.252 0-2.265-1.014-2.265-2.265z"/></svg>
+    Войти через Steam
+  </a>
+  <div style="color:var(--text3);font-size:11px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;">
+    Для игры необходим аккаунт Steam
   </div>
 </div>
 
@@ -2670,8 +2693,37 @@ function renderSteamProfileBlock(state) {
   }
 }
 
+function showLoginOverlay() {
+  const ov = document.getElementById('login-overlay');
+  if (ov) ov.style.display = 'flex';
+  // Скрываем хедер-элементы
+  const balArea = document.getElementById('hdr-bal-area');
+  if (balArea) balArea.style.display = 'none';
+  const ava = document.getElementById('ava');
+  if (ava) ava.style.display = 'none';
+}
+
+function hideLoginOverlay() {
+  const ov = document.getElementById('login-overlay');
+  if (ov) ov.style.display = 'none';
+  // Показываем хедер-элементы
+  const balArea = document.getElementById('hdr-bal-area');
+  if (balArea) balArea.style.display = 'flex';
+  const ava = document.getElementById('ava');
+  if (ava) ava.style.display = 'flex';
+}
+
 function applyState(state) {
-  // Данные от сервера
+  if (!state.loggedIn) {
+    // Не залогинен — показываем экран входа, рендерим кейсы для фона
+    showLoginOverlay();
+    try { renderCases(); } catch(e){}
+    try { resetUpgWheel(); } catch(e){}
+    return;
+  }
+
+  hideLoginOverlay();
+
   nick      = state.nick || 'Игрок';
   balance   = state.balance || 0;
   inventory = (state.inventory || []).map(item => ({
@@ -2680,7 +2732,7 @@ function applyState(state) {
     id: item.skinId,
     featured: item.showcased === 1,
   }));
-  history   = (state.history || []).map(h => ({
+  history = (state.history || []).map(h => ({
     type: h.type,
     item: { ...h.skin, wear: h.wear },
     from: h.source,
@@ -2696,7 +2748,7 @@ function applyState(state) {
   };
   freeDone = state.freeDone || false;
 
-  // Аватар
+  // Аватар в хедере
   const avaEl = document.getElementById('ava');
   if (avaEl) {
     if (state.avatar) {
@@ -2730,22 +2782,17 @@ function applyState(state) {
 //  INIT — загружаем состояние с сервера
 // ═══════════════════════════════════════════════════════
 async function init() {
+  // Сразу показываем оверлей пока грузим
+  showLoginOverlay();
   try {
-    const resp = await fetch('/api/state');
+    const resp  = await fetch('/api/state');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const state = await resp.json();
     applyState(state);
   } catch(e) {
-    console.error('Не удалось загрузить состояние с сервера:', e);
-    // Фолбэк — базовая инициализация без сервера
-    nick = 'Игрок';
-    balance = 0;
-    const avaEl = document.getElementById('ava');
-    if (avaEl) avaEl.textContent = 'И';
-    try { renderCases(); } catch(err){}
-    try { renderCSlots(); } catch(err){}
-    try { resetUpgWheel(); } catch(err){}
-    updBal();
+    console.error('Ошибка загрузки состояния:', e);
+    // Сервер недоступен — оставляем экран входа
+    showLoginOverlay();
   }
 }
 
