@@ -41,8 +41,16 @@ nav{display:flex;gap:2px;flex:1;}
 .bal-val{color:var(--accent);}
 .dep-btn{background:var(--accentg);border:none;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;padding:7px 16px;border-radius:8px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:.18s;}
 .dep-btn:hover{opacity:.85;transform:translateY(-1px);}
-.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));border:2px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;transition:.2s;}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));border:2px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;transition:.2s;overflow:hidden;}
 .avatar:hover{border-color:var(--accent);}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.steam-btn{display:flex;align-items:center;gap:7px;background:#1b2838;border:1px solid #4a90d9;color:#c6d4df;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;padding:5px 13px;border-radius:8px;cursor:pointer;text-decoration:none;letter-spacing:.5px;transition:.18s;white-space:nowrap;}
+.steam-btn:hover{background:#2a475e;border-color:#66aaf0;color:#fff;}
+.steam-btn svg{flex-shrink:0;}
+.steam-logout{background:none;border:1px solid var(--border2);color:var(--text2);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;padding:4px 9px;border-radius:6px;cursor:pointer;letter-spacing:.5px;transition:.18s;}
+.steam-logout:hover{border-color:var(--red);color:var(--red);}
+.steam-profile-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;color:var(--blue);font-size:12px;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.5px;}
+.steam-profile-link:hover{color:#66aaf0;}
 
 /* ── MAIN ── */
 main{max-width:1440px;margin:0 auto;padding:24px 20px;}
@@ -562,6 +570,9 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
     <div class="hdr-right">
       <div class="bal" onclick="openDep()"><span class="bal-val" id="balVal">0.00₽</span></div>
       <button class="dep-btn" onclick="openDep()">+ Пополнить</button>
+      <div id="steam-auth-block">
+        <!-- Заполняется из /api/state -->
+      </div>
       <div class="avatar" id="ava">?</div>
       <button class="mob-nav-toggle" id="mob-toggle" onclick="toggleMobNav()">☰</button>
     </div>
@@ -690,6 +701,7 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
         <div class="profile-ava" id="prof-ava">?</div>
         <div class="profile-name" id="prof-name">Игрок</div>
         <div class="profile-since">Играет с сегодня</div>
+        <div id="prof-steam-block" style="margin-top:10px;"></div>
         <div class="stat-block">
           <div class="stat-block-title">Финансы</div>
           <div class="stat-row"><span class="sk">Потрачено</span><span class="sv" id="st-spent">0₽</span></div>
@@ -2629,43 +2641,114 @@ function renderProfile(){
 }
 
 // ═══════════════════════════════════════════════════════
-//  INIT
+//  STEAM AUTH HELPERS
 // ═══════════════════════════════════════════════════════
-function init(){
-  try { nick = localStorage.getItem('fd-nick') || null; } catch(e){}
-  if(!nick || nick.trim() === ''){
-    nick = 'Игрок';
-    try { localStorage.setItem('fd-nick', nick); } catch(e){}
+const STEAM_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.252 0-2.265-1.014-2.265-2.265z"/></svg>`;
+
+function renderSteamAuthBlock(state) {
+  const block = document.getElementById('steam-auth-block');
+  if (!block) return;
+  if (state.loggedIn) {
+    block.innerHTML = `<button class="steam-logout" onclick="location.href='/auth/logout'">Выйти</button>`;
+  } else {
+    block.innerHTML = `<a class="steam-btn" href="/auth/steam">${STEAM_ICON} Войти через Steam</a>`;
   }
-  const avaEl = document.getElementById('ava');
-  if(avaEl) avaEl.textContent = nick[0].toUpperCase();
-  try { renderCases(); } catch(e){ console.error('renderCases error:', e); }
-  try { renderCSlots(); } catch(e){ console.error('renderCSlots error:', e); }
-  try { resetUpgWheel(); } catch(e){ console.error('resetUpgWheel error:', e); }
-  updBal();
-  addBal(1000);
 }
 
-// Periodic anti-tamper scan
-setInterval(function(){
-  // Check if balance was modified externally
-  try {
-    const b = _getBalance();
-    if(b !== balance){ _tamperAlert(); balance = b; }
-  } catch(e){}
-  // Check for impossible inventory values
-  try {
-    inventory.forEach(item => {
-      const ref = SKINS.find(s=>s.id===item.id);
-      if(ref && Math.abs(item.price - ref.price) > ref.price * 0.01){
-        _tamperAlert();
-        item.price = ref.price; // restore
-      }
-    });
-  } catch(e){}
-}, 2000);
+function renderSteamProfileBlock(state) {
+  const block = document.getElementById('prof-steam-block');
+  if (!block) return;
+  if (state.loggedIn) {
+    block.innerHTML = `
+      <a class="steam-profile-link" href="https://steamcommunity.com/profiles/${state.steamId}" target="_blank" rel="noopener">
+        ${STEAM_ICON} Открыть Steam профиль
+      </a>
+      <br><button class="steam-logout" style="margin-top:6px" onclick="location.href='/auth/logout'">Выйти из аккаунта</button>
+    `;
+  } else {
+    block.innerHTML = `<a class="steam-btn" href="/auth/steam" style="justify-content:center;margin-top:4px">${STEAM_ICON} Войти через Steam</a>`;
+  }
+}
 
-// Запускаем после полной загрузки DOM
+function applyState(state) {
+  // Данные от сервера
+  nick      = state.nick || 'Игрок';
+  balance   = state.balance || 0;
+  inventory = (state.inventory || []).map(item => ({
+    ...item,
+    uid: item.uid,
+    id: item.skinId,
+    featured: item.showcased === 1,
+  }));
+  history   = (state.history || []).map(h => ({
+    type: h.type,
+    item: { ...h.skin, wear: h.wear },
+    from: h.source,
+    ts: h.ts,
+  }));
+  stats = {
+    casesOpened: state.stats?.casesOpened || 0,
+    upgradeWin:  state.stats?.upgradeWin  || 0,
+    upgradeLoss: state.stats?.upgradeLoss || 0,
+    contracts:   state.stats?.contracts   || 0,
+    spent:       state.stats?.spent       || 0,
+    earned:      state.stats?.earned      || 0,
+  };
+  freeDone = state.freeDone || false;
+
+  // Аватар
+  const avaEl = document.getElementById('ava');
+  if (avaEl) {
+    if (state.avatar) {
+      avaEl.innerHTML = `<img src="${state.avatar}" alt="${nick}">`;
+    } else {
+      avaEl.textContent = nick[0].toUpperCase();
+    }
+  }
+
+  // Аватар в профиле
+  const profAva = document.getElementById('prof-ava');
+  if (profAva) {
+    if (state.avatar) {
+      profAva.style.background = 'transparent';
+      profAva.innerHTML = `<img src="${state.avatar}" alt="${nick}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    } else {
+      profAva.textContent = nick[0].toUpperCase();
+    }
+  }
+
+  renderSteamAuthBlock(state);
+  renderSteamProfileBlock(state);
+
+  updBal();
+  try { renderCases(); } catch(e){ console.error('renderCases:', e); }
+  try { renderCSlots(); } catch(e){ console.error('renderCSlots:', e); }
+  try { resetUpgWheel(); } catch(e){ console.error('resetUpgWheel:', e); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT — загружаем состояние с сервера
+// ═══════════════════════════════════════════════════════
+async function init() {
+  try {
+    const resp = await fetch('/api/state');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const state = await resp.json();
+    applyState(state);
+  } catch(e) {
+    console.error('Не удалось загрузить состояние с сервера:', e);
+    // Фолбэк — базовая инициализация без сервера
+    nick = 'Игрок';
+    balance = 0;
+    const avaEl = document.getElementById('ava');
+    if (avaEl) avaEl.textContent = 'И';
+    try { renderCases(); } catch(err){}
+    try { renderCSlots(); } catch(err){}
+    try { resetUpgWheel(); } catch(err){}
+    updBal();
+  }
+}
+
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', init);
 } else {
