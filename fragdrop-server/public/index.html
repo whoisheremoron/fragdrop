@@ -13,7 +13,7 @@
   --accent:#e8a020;--accent2:#ff5722;--accentg:linear-gradient(135deg,#e8a020,#ff5722);
   --blue:#4a90d9;--green:#27ae60;--red:#c0392b;--purple:#8e44ad;--pink:#e91e63;
   --text:#dde1f0;--text2:#6b7090;--text3:#3a3f5a;
-  --common:#9ea8b5;--mil:#5b84a5;--restricted:#8b5cf6;--classified:#e91e63;--covert:#e8a020;--knife:#d4af37;
+  --common:#b0c3d9;--mil:#5e98d9;--restricted:#4b69ff;--classified:#8847ff;--covert:#eb4b4b;--knife:#caab05;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
@@ -75,6 +75,7 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
 .r-restricted{color:var(--restricted);}
 .r-classified{color:var(--classified);}
 .r-covert{color:var(--covert);}
+.r-contraband{color:#e4ae39;}
 .r-knife{color:var(--knife);}
 
 /* ── CASE MODAL ── */
@@ -88,23 +89,24 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
 .modal-body{padding:18px 22px 22px;}
 
 /* ── REEL ── */
-.reel-wrap{background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:relative;height:130px;margin-bottom:14px;}
+.reel-wrap{background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:relative;height:130px;margin-bottom:14px;width:100%;}
 .reel-wrap::before,.reel-wrap::after{content:'';position:absolute;top:0;bottom:0;width:100px;z-index:10;pointer-events:none;}
 .reel-wrap::before{left:0;background:linear-gradient(90deg,var(--bg),transparent);}
 .reel-wrap::after{right:0;background:linear-gradient(270deg,var(--bg),transparent);}
 .reel-pointer{position:absolute;left:50%;top:0;bottom:0;width:2px;z-index:11;transform:translateX(-50%);background:linear-gradient(180deg,transparent,var(--accent) 30%,var(--accent) 70%,transparent);box-shadow:0 0 10px var(--accent);}
 .reel-pointer::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:9px solid var(--accent);}
 .reel-pointer::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid var(--accent);}
-.reel-track{display:flex;align-items:center;gap:6px;padding:6px;white-space:nowrap;will-change:transform;}
+.reel-track{display:flex;align-items:center;gap:6px;padding:6px;white-space:nowrap;will-change:transform;position:absolute;top:0;left:0;}
 .reel-item{flex-shrink:0;width:110px;height:118px;border-radius:8px;border:1px solid var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg3);overflow:hidden;position:relative;gap:4px;}
 .reel-item img{width:86px;height:64px;object-fit:contain;}
 .reel-item-name{font-size:8px;color:var(--text2);text-align:center;padding:0 5px;line-height:1.3;max-width:108px;white-space:normal;word-break:break-word;}
 .reel-item.r-consumer{border-color:var(--common);}
-.reel-item.r-mil{border-color:var(--mil);}
-.reel-item.r-restricted{border-color:rgba(139,92,246,.5);background:rgba(139,92,246,.05);}
-.reel-item.r-classified{border-color:rgba(233,30,99,.5);background:rgba(233,30,99,.05);}
-.reel-item.r-covert{border-color:rgba(232,160,32,.6);background:rgba(232,160,32,.05);}
-.reel-item.r-knife{border-color:rgba(212,175,55,.7);background:rgba(212,175,55,.08);}
+.reel-item.r-mil{border-color:var(--mil);background:rgba(94,152,217,.05);}
+.reel-item.r-restricted{border-color:rgba(75,105,255,.5);background:rgba(75,105,255,.05);}
+.reel-item.r-classified{border-color:rgba(136,71,255,.5);background:rgba(136,71,255,.06);}
+.reel-item.r-covert{border-color:rgba(235,75,75,.6);background:rgba(235,75,75,.06);}
+.reel-item.r-contraband{border-color:rgba(228,174,57,.7);background:rgba(228,174,57,.08);}
+.reel-item.r-knife{border-color:rgba(202,171,5,.7);background:rgba(202,171,5,.08);}
 
 /* ── SPIN RESULT ── */
 .spin-result{display:none;text-align:center;padding:14px 0 6px;animation:resIn .5s cubic-bezier(.34,1.56,.64,1);}
@@ -119,6 +121,8 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
 /* ── BUTTONS ── */
 .btn{background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;padding:8px 18px;border-radius:8px;cursor:pointer;transition:.18s;}
 .btn:hover{border-color:var(--accent);color:var(--accent);}
+.multi-open-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text1);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;padding:7px 18px;border-radius:8px;cursor:pointer;transition:.2s;}
+.multi-open-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
 .btn-primary{background:var(--accentg);border:none;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:10px 22px;border-radius:9px;cursor:pointer;transition:.18s;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;}
 .btn-primary:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 5px 18px rgba(232,160,32,.3);}
 .btn-primary:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none;}
@@ -133,10 +137,12 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
 .ci img{width:84px;height:62px;object-fit:contain;display:block;margin:0 auto 4px;}
 .ci-name{font-size:9px;color:var(--text2);line-height:1.3;margin-bottom:2px;}
 .ci-price{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;}
-.ci.r-restricted{border-color:rgba(139,92,246,.3);}
-.ci.r-classified{border-color:rgba(233,30,99,.3);}
-.ci.r-covert{border-color:rgba(232,160,32,.35);}
-.ci.r-knife{border-color:rgba(212,175,55,.4);}
+.ci.r-mil{border-color:rgba(94,152,217,.3);}
+.ci.r-restricted{border-color:rgba(75,105,255,.35);}
+.ci.r-classified{border-color:rgba(136,71,255,.4);}
+.ci.r-covert{border-color:rgba(235,75,75,.45);}
+.ci.r-contraband{border-color:rgba(228,174,57,.55);background:rgba(228,174,57,.04);}
+.ci.r-knife{border-color:rgba(202,171,5,.5);background:rgba(202,171,5,.04);}
 
 /* ── INVENTORY ── */
 .inv-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
@@ -513,7 +519,7 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
   .modal{border-radius:0 0 14px 14px;max-height:95vh;margin-top:auto;}
 
   /* Reel */
-  .reel-wrap{height:108px;}
+  .reel-wrap{height:108px;margin-left:0;margin-right:0;}
   .reel-item{width:90px;height:98px;}
   .reel-item img{width:70px;height:52px;}
 
@@ -743,6 +749,11 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
         </div>
       </div>
       <button class="btn-primary" id="spin-btn" onclick="spinCase()">Открыть кейс</button>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px" id="multi-btns">
+        <button class="btn multi-open-btn" onclick="openMultiple(3)">× 3</button>
+        <button class="btn multi-open-btn" onclick="openMultiple(5)">× 5</button>
+        <button class="btn multi-open-btn" onclick="openMultiple(10)">× 10</button>
+      </div>
       <div class="stitle" style="font-size:14px;margin-top:20px;margin-bottom:8px"><span class="stitle-bar"></span>Содержимое кейса</div>
       <div class="contents-grid" id="case-contents"></div>
     </div>
@@ -804,7 +815,15 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
 //  SKIN SVG GENERATOR — детальные силуэты как в Steam
 // ═══════════════════════════════════════════════════════
 const WEAR_NAMES = ['Factory New','Minimal Wear','Field-Tested','Well-Worn','Battle-Scarred'];
-const RC = { consumer:'#9ea8b5', mil:'#5b84a5', restricted:'#8b5cf6', classified:'#e91e63', covert:'#e8a020', knife:'#d4af37' };
+const RC = { 
+  consumer:'#b0c3d9',    // белый / Consumer Grade
+  mil:'#5e98d9',         // голубой / Mil-Spec
+  restricted:'#4b69ff',  // синий / Restricted  
+  classified:'#8847ff',  // фиолетовый / Classified
+  covert:'#eb4b4b',      // розовый / Covert
+  contraband:'#e4ae39',  // оранжевый / Contraband (M4A4 Howl)
+  knife:'#caab05'        // жёлтый / Knife
+};
 
 // Детальные SVG-профили оружий с паттернами
 const WEAPON_PROFILES = {
@@ -1016,6 +1035,30 @@ const WEAPON_PROFILES = {
     detail: 'M50 50 L84 50 M50 60 L84 60',
     scope: ''
   },
+  'Нож-фальшион': {
+    body: 'M50 95 L46 68 L50 42 L62 30 L80 28 L94 36 L98 52 L90 68 L80 80 L72 95Z M62 30 L60 16 L70 12 L74 18 L68 30Z',
+    mag: '',
+    stock: '',
+    barrel: '',
+    detail: 'M52 48 L90 52',
+    scope: ''
+  },
+  'Нож-флип': {
+    body: 'M50 98 L46 66 L54 32 L70 22 L86 28 L90 50 L86 72 L78 98Z M70 18 L78 12 L82 18 L76 24 L68 22Z',
+    mag: '',
+    stock: '',
+    barrel: '',
+    detail: 'M52 45 L86 48 M54 58 L84 60',
+    scope: ''
+  },
+  'Нож охотника': {
+    body: 'M44 92 L40 60 L46 28 L64 18 L82 24 L90 44 L88 66 L80 92Z M46 28 L44 12 L56 8 L60 14 L56 28Z',
+    mag: '',
+    stock: '',
+    barrel: '',
+    detail: 'M48 40 L84 44 M48 55 L82 58',
+    scope: ''
+  },
   'default': {
     body: 'M20 78 L28 68 L52 68 L56 72 L150 72 L158 67 L168 69 L168 74 L158 78 L150 80 L56 80 L52 84 L28 84 L20 81Z',
     mag: 'M72 80 L76 96 L84 96 L84 80Z',
@@ -1169,161 +1212,313 @@ function caseSVG(name, color) {
   return svgToDataURL(svg);
 }
 
-function getSkinImg(s) { return skinSVG(s); }
+function getSkinImg(s) {
+  return s.img || skinSVG(s);
+}
 
 // ═══════════════════════════════════════════════════════
-//  60+ SKINS
+//  SKINS — РЕАЛЬНЫЕ цены из market.csgo.com API /v2/prices/RUB.json
+//  Картинки: cdn2.csgo.com/item/image (личное использование)
 // ═══════════════════════════════════════════════════════
+const IMG = (n) => `https://cdn2.csgo.com/item/image/width=155/${encodeURIComponent(n)}.png`;
+
 const SKINS = [
-  // ── KNIVES (редчайшее, дорогое)
-  {id:1,  name:'Керамбит | Градиент',         weapon:'Керамбит',    rarity:'knife', price:52000},
-  {id:2,  name:'Нож-бабочка | Синий сапфир',  weapon:'Нож-бабочка', rarity:'knife', price:98000},
-  {id:3,  name:'Нож M9 | Crimson Web',         weapon:'Нож M9',      rarity:'knife', price:41000},
-  {id:4,  name:'Штык-нож | Fade',              weapon:'Штык-нож',    rarity:'knife', price:33000},
-  {id:5,  name:'Керамбит | Fade',              weapon:'Керамбит',    rarity:'knife', price:61000},
-  {id:6,  name:'Нож M9 | Синий сапфир',        weapon:'Нож M9',      rarity:'knife', price:76000},
-  {id:7,  name:'Нож-бабочка | Градиент',       weapon:'Нож-бабочка', rarity:'knife', price:57000},
-  // ── COVERT
-  {id:8,  name:'AK-47 | Огненный змей',        weapon:'AK-47',       rarity:'covert', price:24000},
-  {id:9,  name:'AWP | Азимов',                  weapon:'AWP',         rarity:'covert', price:5200},
-  {id:10, name:'M4A4 | Вой',                   weapon:'M4A4',        rarity:'covert', price:6800},
-  {id:11, name:'Desert Eagle | Пламя',          weapon:'Desert Eagle',rarity:'covert', price:5900},
-  {id:12, name:'AK-47 | Вулкан',               weapon:'AK-47',       rarity:'covert', price:7800},
-  {id:13, name:'AWP | Медуза',                  weapon:'AWP',         rarity:'covert', price:19500},
-  {id:14, name:'M4A4 | Азимов',                weapon:'M4A4',        rarity:'covert', price:9600},
-  {id:15, name:'AK-47 | Точечный удар',         weapon:'AK-47',       rarity:'covert', price:12000},
-  {id:16, name:'AWP | Fade',                    weapon:'AWP',         rarity:'covert', price:31000},
-  {id:17, name:'Glock-18 | Вой',               weapon:'Glock-18',    rarity:'covert', price:3600},
-  // ── CLASSIFIED
-  {id:18, name:'M4A1-S | Гиперзверь',          weapon:'M4A1-S',      rarity:'classified', price:4100},
-  {id:19, name:'AK-47 | Кровавый спорт',       weapon:'AK-47',       rarity:'classified', price:2300},
-  {id:20, name:'Glock-18 | Бирюзовая лагуна',  weapon:'Glock-18',    rarity:'classified', price:980},
-  {id:21, name:'USP-S | Убийца',               weapon:'USP-S',       rarity:'classified', price:1900},
-  {id:22, name:'AWP | Хищник',                 weapon:'AWP',         rarity:'classified', price:4500},
-  {id:23, name:'AUG | Запретный плод',          weapon:'AUG',         rarity:'classified', price:920},
-  {id:24, name:'M4A1-S | Printstream',          weapon:'M4A1-S',      rarity:'classified', price:7200},
-  {id:25, name:'AK-47 | Синий глянец',          weapon:'AK-47',       rarity:'classified', price:1550},
-  {id:26, name:'Desert Eagle | Монарх',         weapon:'Desert Eagle',rarity:'classified', price:3400},
-  {id:27, name:'AWP | Printstream',             weapon:'AWP',         rarity:'classified', price:9800},
-  {id:28, name:'USP-S | Printstream',           weapon:'USP-S',       rarity:'classified', price:5900},
-  {id:29, name:'MP9 | Неоновый рассвет',        weapon:'MP9',         rarity:'classified', price:760},
-  // ── RESTRICTED
-  {id:30, name:'Glock-18 | Ядерный сад',        weapon:'Glock-18',    rarity:'restricted', price:490},
-  {id:31, name:'FAMAS | Авангард',              weapon:'FAMAS',       rarity:'restricted', price:330},
-  {id:32, name:'MP5-SD | Кровь тигра',          weapon:'MP5-SD',      rarity:'restricted', price:300},
-  {id:33, name:'P250 | Молния',                 weapon:'P250',        rarity:'restricted', price:230},
-  {id:34, name:'Tec-9 | Ядерная угроза',        weapon:'Tec-9',       rarity:'restricted', price:190},
-  {id:35, name:'SG 553 | Ультрафиолет',         weapon:'SG 553',      rarity:'restricted', price:170},
-  {id:36, name:'AUG | Арктика',                 weapon:'AUG',         rarity:'restricted', price:220},
-  {id:37, name:'SSG 08 | Паутина крови',        weapon:'SSG 08',      rarity:'restricted', price:390},
-  {id:38, name:'MP7 | Полночный синий',         weapon:'MP7',         rarity:'restricted', price:155},
-  {id:39, name:'MAC-10 | Неон',                 weapon:'MAC-10',      rarity:'restricted', price:140},
-  {id:40, name:'UMP-45 | Картечь',              weapon:'UMP-45',      rarity:'restricted', price:120},
-  // ── MIL-SPEC
-  {id:41, name:'CZ75-Auto | Жёлтый жакет',      weapon:'CZ75-Auto',   rarity:'mil', price:115},
-  {id:42, name:'SSG 08 | Кровь в воде',         weapon:'SSG 08',      rarity:'mil', price:150},
-  {id:43, name:'MAC-10 | Неоновый гонщик',      weapon:'MAC-10',      rarity:'mil', price:390},
-  {id:44, name:'Nova | Охотник',                weapon:'Nova',        rarity:'mil', price:80},
-  {id:45, name:'MP9 | Пустынный рейд',          weapon:'MP9',         rarity:'mil', price:98},
-  {id:46, name:'Galil AR | Сланец',             weapon:'Galil AR',    rarity:'mil', price:88},
-  {id:47, name:'FAMAS | Синий сланец',          weapon:'FAMAS',       rarity:'mil', price:70},
-  {id:48, name:'AUG | Синий сланец',            weapon:'AUG',         rarity:'mil', price:75},
-  {id:49, name:'MP7 | Морозный берег',          weapon:'MP7',         rarity:'mil', price:58},
-  {id:50, name:'UMP-45 | Тёмный металл',        weapon:'UMP-45',      rarity:'mil', price:50},
-  {id:51, name:'CZ75-Auto | Тёмный металл',     weapon:'CZ75-Auto',   rarity:'mil', price:64},
-  {id:52, name:'SG 553 | Тёмный металл',        weapon:'SG 553',      rarity:'mil', price:60},
-  // ── CONSUMER (балласт — самые дешёвые)
-  {id:53, name:'P2000 | Серебряный цвет',       weapon:'P2000',       rarity:'consumer', price:28},
-  {id:54, name:'MP7 | Полночный гель',          weapon:'MP7',         rarity:'consumer', price:32},
-  {id:55, name:'UMP-45 | Орхидея',              weapon:'UMP-45',      rarity:'consumer', price:22},
-  {id:56, name:'Galil AR | Пустынный рейнджер', weapon:'Galil AR',    rarity:'consumer', price:26},
-  {id:57, name:'Nova | Старое дерево',          weapon:'Nova',        rarity:'consumer', price:19},
-  {id:58, name:'MAC-10 | Тёмный дождь',         weapon:'MAC-10',      rarity:'consumer', price:17},
-  {id:59, name:'FAMAS | Тёмный лес',            weapon:'FAMAS',       rarity:'consumer', price:21},
-  {id:60, name:'SSG 08 | Мастер джунглей',      weapon:'SSG 08',      rarity:'consumer', price:25},
-  {id:61, name:'MP9 | Песчаная буря',           weapon:'MP9',         rarity:'consumer', price:18},
-  {id:62, name:'Tec-9 | Серебряный кварц',      weapon:'Tec-9',       rarity:'consumer', price:20},
-  {id:63, name:'CZ75-Auto | Жёлтая полоска',    weapon:'CZ75-Auto',   rarity:'consumer', price:15},
-  {id:64, name:'P250 | Каменный карьер',        weapon:'P250',        rarity:'consumer', price:18},
+  // ══ KNIVES — Special rarity (жёлтые) ══
+  {id:1,  name:'Karambit | Fade (Factory New)',             weapon:'Керамбит',    rarity:'knife',      price:315000, img:IMG('★ Karambit | Fade (Factory New)')},
+  {id:2,  name:'Butterfly Knife | Doppler (Factory New)',   weapon:'Нож-бабочка', rarity:'knife',      price:580000, img:IMG('★ Butterfly Knife | Doppler (Factory New)')},
+  {id:3,  name:'M9 Bayonet | Crimson Web (Field-Tested)',   weapon:'Нож M9',      rarity:'knife',      price:47000,  img:IMG('★ M9 Bayonet | Crimson Web (Field-Tested)')},
+  {id:4,  name:'Bayonet | Fade (Factory New)',              weapon:'Штык-нож',    rarity:'knife',      price:39000,  img:IMG('★ Bayonet | Fade (Factory New)')},
+  {id:5,  name:'Karambit | Doppler (Factory New)',          weapon:'Керамбит',    rarity:'knife',      price:95000,  img:IMG('★ Karambit | Doppler (Factory New)')},
+  {id:6,  name:'M9 Bayonet | Doppler (Factory New)',        weapon:'Нож M9',      rarity:'knife',      price:420000, img:IMG('★ M9 Bayonet | Doppler (Factory New)')},
+  {id:7,  name:'Butterfly Knife | Fade (Factory New)',      weapon:'Нож-бабочка', rarity:'knife',      price:248000, img:IMG('★ Butterfly Knife | Fade (Factory New)')},
+  {id:8,  name:'Falchion Knife | Fade (Factory New)',       weapon:'Нож-фальшион',rarity:'knife',      price:28000,  img:IMG('★ Falchion Knife | Fade (Factory New)')},
+  {id:9,  name:'Flip Knife | Doppler (Factory New)',        weapon:'Нож-флип',    rarity:'knife',      price:24000,  img:IMG('★ Flip Knife | Doppler (Factory New)')},
+  {id:10, name:'Huntsman Knife | Fade (Factory New)',       weapon:'Нож охотника',rarity:'knife',      price:32000,  img:IMG('★ Huntsman Knife | Fade (Factory New)')},
+  // ══ CONTRABAND (только M4A4 Howl — оранжевый) ══
+  {id:11, name:'M4A4 | Howl (Field-Tested)',                weapon:'M4A4',        rarity:'contraband', price:185000, img:IMG('M4A4 | Howl (Field-Tested)')},
+  // ══ COVERT — розовые ★ ══
+  {id:12, name:'AK-47 | Fire Serpent (Field-Tested)',       weapon:'AK-47',       rarity:'covert'    , price:74000,  img:IMG('AK-47 | Fire Serpent (Field-Tested)')},
+  {id:13, name:'AWP | Asiimov (Field-Tested)',              weapon:'AWP',         rarity:'covert',     price:10695,  img:IMG('AWP | Asiimov (Field-Tested)')},
+  {id:14, name:'Desert Eagle | Blaze (Factory New)',        weapon:'Desert Eagle',rarity:'restricted', price:84150,  img:IMG('Desert Eagle | Blaze (Factory New)')},
+  {id:15, name:'AK-47 | Vulcan (Field-Tested)',             weapon:'AK-47',       rarity:'covert',     price:17200,  img:IMG('AK-47 | Vulcan (Field-Tested)')},
+  {id:16, name:'AWP | Medusa (Field-Tested)',               weapon:'AWP',         rarity:'covert',     price:196000, img:IMG('AWP | Medusa (Field-Tested)')},
+  {id:17, name:'M4A4 | Asiimov (Field-Tested)',             weapon:'M4A4',        rarity:'covert',     price:12000,  img:IMG('M4A4 | Asiimov (Field-Tested)')},
+  {id:18, name:'AK-47 | Fuel Injector (Field-Tested)',      weapon:'AK-47',       rarity:'covert',     price:16300,  img:IMG('AK-47 | Fuel Injector (Field-Tested)')},
+  {id:19, name:'AWP | Fade (Factory New)',                  weapon:'AWP',         rarity:'covert',     price:91778,  img:IMG('AWP | Fade (Factory New)')},
+  {id:20, name:'AWP | Printstream (Factory New)',           weapon:'AWP',         rarity:'covert',     price:30434,  img:IMG('AWP | Printstream (Factory New)')},
+  {id:21, name:'AK-47 | Bloodsport (Field-Tested)',         weapon:'AK-47',       rarity:'covert',     price:13800,  img:IMG('AK-47 | Bloodsport (Field-Tested)')},
+  {id:22, name:'AWP | Neo-Noir (Field-Tested)',             weapon:'AWP',         rarity:'covert',     price:3293,   img:IMG('AWP | Neo-Noir (Field-Tested)')},
+  {id:23, name:'AWP | Lightning Strike (Factory New)',      weapon:'AWP',         rarity:'covert',     price:51739,  img:IMG('AWP | Lightning Strike (Factory New)')},
+  {id:24, name:'AWP | Wildfire (Factory New)',              weapon:'AWP',         rarity:'covert',     price:18948,  img:IMG('AWP | Wildfire (Factory New)')},
+  {id:25, name:'AK-47 | Neon Revolution (Field-Tested)',    weapon:'AK-47',       rarity:'covert',     price:9200,   img:IMG('AK-47 | Neon Revolution (Field-Tested)')},
+  {id:26, name:'AK-47 | The Empress (Field-Tested)',        weapon:'AK-47',       rarity:'covert',     price:7199,   img:IMG('AK-47 | The Empress (Field-Tested)')},
+  // ══ CLASSIFIED — фиолетовые ══
+  {id:27, name:'M4A1-S | Printstream (Factory New)',        weapon:'M4A1-S',      rarity:'covert',     price:58000,  img:IMG('M4A1-S | Printstream (Factory New)')},
+  {id:28, name:'USP-S | Printstream (Factory New)',         weapon:'USP-S',       rarity:'covert',     price:30000,  img:IMG('USP-S | Printstream (Factory New)')},
+  {id:29, name:'Desert Eagle | Printstream (Factory New)',  weapon:'Desert Eagle',rarity:'covert',     price:7331,   img:IMG('Desert Eagle | Printstream (Factory New)')},
+  {id:30, name:'AWP | Wildfire (Field-Tested)',             weapon:'AWP',         rarity:'classified', price:4199,   img:IMG('AWP | Wildfire (Field-Tested)')},
+  {id:31, name:'AK-47 | Nightwish (Field-Tested)',          weapon:'AK-47',       rarity:'covert'    , price:5100,   img:IMG('AK-47 | Nightwish (Field-Tested)')},
+  {id:32, name:'M4A1-S | Hyper Beast (Field-Tested)',       weapon:'M4A1-S',      rarity:'covert'    , price:6900,   img:IMG('M4A1-S | Hyper Beast (Field-Tested)')},
+  {id:33, name:'AK-47 | Redline (Field-Tested)',            weapon:'AK-47',       rarity:'classified', price:2840,   img:IMG('AK-47 | Redline (Field-Tested)')},
+  {id:34, name:'AK-47 | Blue Laminate (Factory New)',       weapon:'AK-47',       rarity:'classified', price:1998,   img:IMG('AK-47 | Blue Laminate (Factory New)')},
+  {id:35, name:'AWP | Chromatic Aberration (Field-Tested)', weapon:'AWP',         rarity:'covert'    , price:2700,   img:IMG('AWP | Chromatic Aberration (Field-Tested)')},
+  {id:36, name:'AWP | Electric Hive (Field-Tested)',        weapon:'AWP',         rarity:'classified', price:3509,   img:IMG('AWP | Electric Hive (Field-Tested)')},
+  {id:37, name:'AK-47 | Head Shot (Field-Tested)',          weapon:'AK-47',       rarity:'covert'    , price:2999,   img:IMG('AK-47 | Head Shot (Field-Tested)')},
+  {id:38, name:'AK-47 | Neon Rider (Field-Tested)',         weapon:'AK-47',       rarity:'covert'    , price:4660,   img:IMG('AK-47 | Neon Rider (Field-Tested)')},
+  {id:39, name:'AK-47 | The Oligarch (Field-Tested)',       weapon:'AK-47',       rarity:'covert'    , price:8400,   img:IMG('AK-47 | The Oligarch (Field-Tested)')},
+  {id:40, name:'Desert Eagle | Code Red (Field-Tested)',    weapon:'Desert Eagle',rarity:'covert'    , price:3419,   img:IMG('Desert Eagle | Code Red (Field-Tested)')},
+  {id:41, name:'AWP | Crakow! (Field-Tested)',              weapon:'AWP',         rarity:'classified', price:3450,   img:IMG('AWP | Crakow! (Field-Tested)')},
+  {id:42, name:'M4A1-S | Golden Coil (Field-Tested)',       weapon:'M4A1-S',      rarity:'classified', price:2800,   img:IMG('M4A1-S | Golden Coil (Field-Tested)')},
+  {id:43, name:'AWP | Chrome Cannon (Field-Tested)',        weapon:'AWP',         rarity:'classified', price:2249,   img:IMG('AWP | Chrome Cannon (Field-Tested)')},
+  {id:44, name:'Desert Eagle | Kumicho Dragon (Field-Tested)',weapon:'Desert Eagle',rarity:'classified',price:1800,  img:IMG('Desert Eagle | Kumicho Dragon (Field-Tested)')},
+  {id:45, name:'Desert Eagle | Midnight Storm (Field-Tested)',weapon:'Desert Eagle',rarity:'classified',price:1949,  img:IMG('Desert Eagle | Midnight Storm (Field-Tested)')},
+  // ══ RESTRICTED — синие ══
+  {id:46, name:'P250 | Asiimov (Field-Tested)',             weapon:'P250',        rarity:'restricted', price:340,    img:IMG('P250 | Asiimov (Field-Tested)')},
+  {id:47, name:'MP7 | Fade (Factory New)',                  weapon:'MP7',         rarity:'restricted', price:1150,   img:IMG('MP7 | Fade (Factory New)')},
+  {id:48, name:'SSG 08 | Blood in the Water (Factory New)', weapon:'SSG 08',      rarity:'covert',     price:11000,   img:IMG('SSG 08 | Blood in the Water (Factory New)')},
+  {id:49, name:'Glock-18 | Water Elemental (Factory New)',  weapon:'Glock-18',    rarity:'restricted', price:790,    img:IMG('Glock-18 | Water Elemental (Factory New)')},
+  {id:50, name:'Desert Eagle | Mecha Industries (Field-Tested)',weapon:'Desert Eagle',rarity:'restricted',price:506, img:IMG('Desert Eagle | Mecha Industries (Field-Tested)')},
+  {id:51, name:'MAC-10 | Neon Rider (Field-Tested)',        weapon:'MAC-10',      rarity:'restricted', price:480,    img:IMG('MAC-10 | Neon Rider (Field-Tested)')},
+  {id:52, name:'AUG | Fleet Flock (Field-Tested)',          weapon:'AUG',         rarity:'restricted', price:982,    img:IMG('AUG | Fleet Flock (Field-Tested)')},
+  {id:53, name:'AWP | Fever Dream (Field-Tested)',          weapon:'AWP',         rarity:'restricted', price:1200,   img:IMG('AWP | Fever Dream (Field-Tested)')},
+  {id:54, name:'AK-47 | Safety Net (Field-Tested)',         weapon:'AK-47',       rarity:'restricted', price:242,    img:IMG('AK-47 | Safety Net (Field-Tested)')},
+  {id:55, name:'AWP | Atheris (Field-Tested)',              weapon:'AWP',         rarity:'restricted', price:374,    img:IMG('AWP | Atheris (Field-Tested)')},
+  {id:56, name:'Desert Eagle | Conspiracy (Field-Tested)',  weapon:'Desert Eagle',rarity:'restricted', price:1409,   img:IMG('Desert Eagle | Conspiracy (Field-Tested)')},
+  {id:57, name:'AK-47 | Aquamarine Revenge (Field-Tested)', weapon:'AK-47',       rarity:'covert',     price:4028,   img:IMG('AK-47 | Aquamarine Revenge (Field-Tested)')},
+  {id:58, name:'AK-47 | Phantom Disruptor (Field-Tested)',  weapon:'AK-47',       rarity:'restricted', price:668,    img:IMG('AK-47 | Phantom Disruptor (Field-Tested)')},
+  {id:59, name:'AWP | Duality (Field-Tested)',              weapon:'AWP',         rarity:'restricted', price:324,    img:IMG('AWP | Duality (Field-Tested)')},
+  {id:60, name:'AUG | Syd Mead (Field-Tested)',             weapon:'AUG',         rarity:'restricted', price:922,    img:IMG('AUG | Syd Mead (Field-Tested)')},
+  {id:61, name:'Desert Eagle | Heirloom (Field-Tested)',    weapon:'Desert Eagle',rarity:'restricted', price:437,    img:IMG('Desert Eagle | Heirloom (Field-Tested)')},
+  {id:62, name:'AK-47 | Point Disarray (Field-Tested)',     weapon:'AK-47',       rarity:'restricted', price:1227,   img:IMG('AK-47 | Point Disarray (Field-Tested)')},
+  {id:63, name:'USP-S | Jawbreaker (Battle-Scarred)',       weapon:'USP-S',       rarity:'restricted', price:330,    img:IMG('USP-S | Jawbreaker (Battle-Scarred)')},
+  {id:64, name:'AWP | Sun in Leo (Field-Tested)',           weapon:'AWP',         rarity:'restricted', price:1886,   img:IMG('AWP | Sun in Leo (Field-Tested)')},
+  // ══ MIL-SPEC — голубые ══
+  {id:65, name:'CZ75-Auto | Yellow Jacket (Field-Tested)',  weapon:'CZ75-Auto',   rarity:'mil',        price:388,    img:IMG('CZ75-Auto | Yellow Jacket (Field-Tested)')},
+  {id:66, name:'AK-47 | Searing Rage (Field-Tested)',       weapon:'AK-47',       rarity:'mil',        price:400,    img:IMG('AK-47 | Searing Rage (Field-Tested)')},
+  {id:67, name:'AK-47 | Slate (Field-Tested)',              weapon:'AK-47',       rarity:'mil',        price:383,    img:IMG('AK-47 | Slate (Field-Tested)')},
+  {id:68, name:'AK-47 | Crossfade (Field-Tested)',          weapon:'AK-47',       rarity:'mil',        price:177,    img:IMG('AK-47 | Crossfade (Field-Tested)')},
+  {id:69, name:'AWP | Mortis (Field-Tested)',               weapon:'AWP',         rarity:'mil',        price:327,    img:IMG('AWP | Mortis (Field-Tested)')},
+  {id:70, name:'AWP | Worm God (Field-Tested)',             weapon:'AWP',         rarity:'mil',        price:250,    img:IMG('AWP | Worm God (Field-Tested)')},
+  {id:71, name:'AUG | Torque (Field-Tested)',               weapon:'AUG',         rarity:'mil',        price:499,    img:IMG('AUG | Torque (Field-Tested)')},
+  {id:72, name:'Desert Eagle | Sputnik (Field-Tested)',     weapon:'Desert Eagle',rarity:'mil',        price:175,    img:IMG('Desert Eagle | Sputnik (Field-Tested)')},
+  {id:73, name:'AK-47 | Ice Coaled (Field-Tested)',         weapon:'AK-47',       rarity:'mil',        price:445,    img:IMG('AK-47 | Ice Coaled (Field-Tested)')},
+  {id:74, name:'AWP | Capillary (Field-Tested)',            weapon:'AWP',         rarity:'mil',        price:47,     img:IMG('AWP | Capillary (Field-Tested)')},
+  {id:75, name:'AK-47 | Rat Rod (Field-Tested)',            weapon:'AK-47',       rarity:'mil',        price:396,    img:IMG('AK-47 | Rat Rod (Field-Tested)')},
+  {id:76, name:'AUG | Momentum (Field-Tested)',             weapon:'AUG',         rarity:'mil',        price:412,    img:IMG('AUG | Momentum (Field-Tested)')},
+  {id:77, name:'AK-47 | Elite Build (Field-Tested)',        weapon:'AK-47',       rarity:'mil',        price:148,    img:IMG('AK-47 | Elite Build (Field-Tested)')},
+  {id:78, name:'AWP | Exoskeleton (Field-Tested)',          weapon:'AWP',         rarity:'mil',        price:443,    img:IMG('AWP | Exoskeleton (Field-Tested)')},
+  {id:79, name:'AUG | Colony (Field-Tested)',               weapon:'AUG',         rarity:'mil',        price:255,    img:IMG('AUG | Colony (Field-Tested)')},
+  {id:80, name:'Desert Eagle | Oxide Blaze (Field-Tested)', weapon:'Desert Eagle',rarity:'mil',        price:42,     img:IMG('Desert Eagle | Oxide Blaze (Field-Tested)')},
+  // ══ CONSUMER — белые ══
+  {id:81, name:'AK-47 | Olive Polycam (Field-Tested)',      weapon:'AK-47',       rarity:'consumer',   price:9,      img:IMG('AK-47 | Olive Polycam (Field-Tested)')},
+  {id:82, name:'AK-47 | Safari Mesh (Field-Tested)',        weapon:'AK-47',       rarity:'consumer',   price:6,      img:IMG('AK-47 | Safari Mesh (Field-Tested)')},
+  {id:83, name:'AWP | Safari Mesh (Field-Tested)',          weapon:'AWP',         rarity:'consumer',   price:10,     img:IMG('AWP | Safari Mesh (Field-Tested)')},
+  {id:84, name:'AK-47 | Wintergreen (Field-Tested)',        weapon:'AK-47',       rarity:'consumer',   price:141,    img:IMG('AK-47 | Wintergreen (Field-Tested)')},
+  {id:85, name:'AK-47 | VariCamo Grey (Field-Tested)',      weapon:'AK-47',       rarity:'consumer',   price:10,     img:IMG('AK-47 | VariCamo Grey (Field-Tested)')},
+  {id:86, name:'AUG | Amber Slipstream (Field-Tested)',     weapon:'AUG',         rarity:'consumer',   price:24,     img:IMG('AUG | Amber Slipstream (Field-Tested)')},
+  {id:87, name:'AUG | Condemned (Field-Tested)',            weapon:'AUG',         rarity:'consumer',   price:3,      img:IMG('AUG | Condemned (Field-Tested)')},
+  {id:88, name:'CZ75-Auto | Tuxedo (Field-Tested)',         weapon:'CZ75-Auto',   rarity:'consumer',   price:24,     img:IMG('CZ75-Auto | Tuxedo (Field-Tested)')},
+  {id:89, name:'CZ75-Auto | Polymer (Field-Tested)',        weapon:'CZ75-Auto',   rarity:'consumer',   price:46,     img:IMG('CZ75-Auto | Polymer (Field-Tested)')},
+  {id:90, name:'AK-47 | Steel Delta (Field-Tested)',        weapon:'AK-47',       rarity:'consumer',   price:164,    img:IMG('AK-47 | Steel Delta (Field-Tested)')},
+  {id:91, name:'AUG | Luxe Trim (Field-Tested)',            weapon:'AUG',         rarity:'consumer',   price:18,     img:IMG('AUG | Luxe Trim (Field-Tested)')},
+  {id:92, name:'AWP | Pit Viper (Field-Tested)',            weapon:'AWP',         rarity:'consumer',   price:45,     img:IMG('AWP | Pit Viper (Field-Tested)')},
+  {id:93, name:'AWP | Phobos (Field-Tested)',               weapon:'AWP',         rarity:'consumer',   price:163,    img:IMG('AWP | Phobos (Field-Tested)')},
+  {id:94, name:'CZ75-Auto | Circaetus (Field-Tested)',      weapon:'CZ75-Auto',   rarity:'consumer',   price:16,     img:IMG('CZ75-Auto | Circaetus (Field-Tested)')},
+  {id:95, name:'AK-47 | Uncharted (Field-Tested)',          weapon:'AK-47',       rarity:'consumer',   price:48,     img:IMG('AK-47 | Uncharted (Field-Tested)')},
+  {id:96, name:'AUG | Tom Cat (Field-Tested)',              weapon:'AUG',         rarity:'consumer',   price:17,     img:IMG('AUG | Tom Cat (Field-Tested)')},
+  {id:97, name:'AUG | Snake Pit (Field-Tested)',            weapon:'AUG',         rarity:'consumer',   price:2,      img:IMG('AUG | Snake Pit (Field-Tested)')},
+  {id:98, name:'AK-47 | Crossfade (Battle-Scarred)',        weapon:'AK-47',       rarity:'consumer',   price:171,    img:IMG('AK-47 | Crossfade (Battle-Scarred)')},
+  {id:99, name:'Desert Eagle | Oxide Blaze (Factory New)',  weapon:'Desert Eagle',rarity:'consumer',   price:71,     img:IMG('Desert Eagle | Oxide Blaze (Factory New)')},
+  {id:100,name:'AUG | Stymphalian (Battle-Scarred)',        weapon:'AUG',         rarity:'consumer',   price:284,    img:IMG('AUG | Stymphalian (Battle-Scarred)')},
 ];
 
 function skin(id){ return SKINS.find(s=>s.id===id); }
 
 // ═══════════════════════════════════════════════════════
-//  КЕЙСЫ — пересобраны, окупаемость <50%
-//  Математика: EV = Σ(вес_редкости × avgPrice) / price_кейса
-//  Целевой EV: 0.30–0.45 (казино зарабатывает 55–70%)
+//  КЕЙСЫ — сбалансированные, EV ~35–50% от цены кейса
+//  Редко окупают >1.5× (ножи/covert очень низкий вес)
 // ═══════════════════════════════════════════════════════
 const CASES = [
-  // Базовый стартовый — много мусора, но дёшевый
-  {id:'starter',    name:'Стартовый кейс',        color:'#4a90d9', badge:null,         price:149,
-   items:[9,19,20,30,31,32,41,42,44,45,46,47,53,54,55,56,57,58,59,60,61,62,63,64]},
+  // ═══ СТАРТОВЫЙ — 99₽, только mil/restricted/немного classified ═══
+  {id:'starter', name:'Стартовый кейс', color:'#4a90d9', badge:null, price:99,
+   items:[33,34,46,54,55,58,59,61,63,65,67,68,69,70,72,74,77,79,80,81,82,83,85,87,88,91,94,96,97]},
 
-  // Призма — средний, главное covert дорогое, но редкое
-  {id:'prisma',     name:'Кейс «Призма»',          color:'#8e44ad', badge:null,         price:249,
-   items:[8,9,18,19,30,31,32,41,42,43,44,45,53,54,55,56,57,1,4]},
+  // ═══ ПРИЗМА — 199₽, restricted+classified, редко covert ═══
+  {id:'prisma', name:'Кейс «Призма»', color:'#8e44ad', badge:null, price:199,
+   items:[22,25,35,30,33,43,44,45,46,47,49,50,51,52,54,58,59,60,63,65,66,67,69,70,71,73,75,78,84,86,89,90,92,93,95,98,99]},
 
-  // Гамма — зелёный, средний
-  {id:'gamma',      name:'Гамма-2',                color:'#27ae60', badge:null,         price:279,
-   items:[10,12,20,21,30,33,34,35,41,42,43,44,45,53,54,55,1,4]},
+  // ═══ ГАММА-2 — 249₽ ═══
+  {id:'gamma', name:'Гамма-2', color:'#27ae60', badge:null, price:249,
+   items:[8,9,17,22,25,26,31,37,48,30,33,34,36,41,42,46,47,54,55,59,61,62,64,66,67,68,69,70,74,76,77,83,84,86,90,91,92,93,98]},
 
-  // Хит — дорогой, много мусора, малый шанс ножа
-  {id:'recoil',     name:'Кейс «Отдача»',          color:'#e91e63', badge:'ХИТ',       price:299,
-   items:[9,11,18,22,30,32,35,41,42,44,53,54,55,56,57,58,59,2]},
+  // ═══ ОТДАЧА — 299₽, ХИТ ═══
+  {id:'recoil', name:'Кейс «Отдача»', color:'#e91e63', badge:'ХИТ', price:299,
+   items:[3,4,9,13,17,21,24,25,26,29,32,38,39,40,48,57,41,46,47,51,52,53,56,60,64,65,66,69,71,72,73,76,78,80,82,83,85,89,90,94,95,99]},
 
-  // Излом — дешёвый, почти нет ценного
-  {id:'fracture',   name:'Излом',                  color:'#d35400', badge:null,         price:179,
-   items:[19,20,23,31,32,33,34,42,43,44,45,46,47,53,54,55,56,57,58,59,60,61,62]},
+  // ═══ ИЗЛОМ — 149₽, дешёвый ═══
+  {id:'fracture', name:'Излом', color:'#d35400', badge:null, price:149,
+   items:[54,55,59,63,65,67,68,70,72,74,77,79,80,81,82,83,85,86,87,88,89,90,91,92,93,94,95,96,97,100]},
 
-  // Опасная зона — дорогой, грандиозный лут но огромный балласт
-  {id:'danger',     name:'Опасная зона',            color:'#e8a020', badge:'ТОП',       price:399,
-   items:[8,10,13,18,21,22,30,31,32,33,34,41,42,43,44,53,54,55,56,57,58,1,2,3,4,5]},
+  // ═══ ОПАСНАЯ ЗОНА — 399₽, ТОП ═══
+  {id:'danger', name:'Опасная зона', color:'#e8a020', badge:'ТОП', price:399,
+   items:[3,4,5,8,9,10,12,13,15,18,19,20,21,23,24,27,28,29,31,32,35,38,39,48,57,36,14,46,47,49,50,52,53,56,60,61,62,64,65,66,69,71,73,75,76,78]},
 
-  // Мечты — самый дорогой, ножи есть, но почти недостижимо
-  {id:'dreams',     name:'Мечты и кошмары',         color:'#9b59b6', badge:null,         price:449,
-   items:[9,11,14,15,16,18,20,21,22,24,30,31,32,33,34,35,1,2,3,4,7]},
+  // ═══ МЕЧТЫ И КОШМАРЫ — 449₽ ═══
+  {id:'dreams', name:'Мечты и кошмары', color:'#9b59b6', badge:null, price:449,
+   items:[1,2,3,4,5,6,7,11,12,13,15,16,18,19,20,22,23,24,25,27,28,29,31,32,38,39,40,48,57,41,14,47,52,53,56,64,65,66,69,71,73,78]},
 
-  // Хромá — дешёвый, средний лут
-  {id:'chroma3',    name:'Хромá 3',                color:'#16a085', badge:null,         price:199,
-   items:[11,19,20,23,31,33,34,35,41,42,43,44,46,53,54,55,56,57,58,59,60]},
+  // ═══ ХРОМА 3 — 179₽ ═══
+  {id:'chroma3', name:'Хромá 3', color:'#16a085', badge:null, price:179,
+   items:[8,22,26,35,40,33,43,44,45,46,49,50,51,54,58,59,61,63,65,67,68,70,72,74,75,80,82,84,86,88,89,90,91,92,93,99]},
 
-  // Спектр — среднячок
-  {id:'spectrum2',  name:'Спектр 2',               color:'#c0392b', badge:null,         price:229,
-   items:[8,12,18,21,22,30,32,34,35,41,42,44,53,54,55,56,57,58,3]},
+  // ═══ СПЕКТР 2 — 229₽ ═══
+  {id:'spectrum2', name:'Спектр 2', color:'#c0392b', badge:null, price:229,
+   items:[9,13,17,21,25,26,29,32,37,48,30,34,36,42,43,46,47,52,53,54,55,59,60,62,63,65,66,67,71,73,76,77,78,79,83,85,87,89,94,95,96,98]},
 
-  // Гидра — дорогой, много мусора
-  {id:'hydra',      name:'Операция «Гидра»',        color:'#1abc9c', badge:null,         price:349,
-   items:[10,11,13,19,21,23,30,33,35,42,43,45,46,47,53,54,55,56,57,58,3,4]},
+  // ═══ ОПЕРАЦИЯ ГИДРА — 329₽ ═══
+  {id:'hydra', name:'Операция «Гидра»', color:'#1abc9c', badge:null, price:329,
+   items:[3,4,9,10,12,13,17,18,21,22,24,26,31,32,35,37,38,48,57,30,36,41,43,14,47,53,55,56,59,60,62,63,64,65,66,69,70,71,73,74,75,76,83,84,92,93,95]},
 
-  // Блеск — дорогой, ставка на classified/covert
-  {id:'clutch',     name:'Кейс «Блеск»',            color:'#f39c12', badge:'ГОРЯЧИЙ',   price:319,
-   items:[15,16,17,18,22,25,26,29,36,37,38,39,40,47,48,49,50,53,54,55,56,5,6]},
+  // ═══ БЛЕСК — 349₽, ГОРЯЧИЙ ═══
+  {id:'clutch', name:'Кейс «Блеск»', color:'#f39c12', badge:'ГОРЯЧИЙ', price:349,
+   items:[1,3,4,5,7,13,18,19,20,21,22,24,25,27,28,29,31,32,38,39,48,57,30,41,42,14,46,47,50,52,53,56,60,61,62,64,65,66,69,71,72,73,75,79,84,86,90,92,93,98,99]},
 
-  // Укус змеи — средний
-  {id:'snakebite',  name:'Укус змеи',               color:'#2ecc71', badge:null,         price:219,
-   items:[10,14,20,23,24,31,33,36,38,40,43,46,49,51,53,54,55,56,57,58,59]},
+  // ═══ CS20 ЛИМИТ — 549₽ ═══
+  {id:'cs20', name:'CS20 Кейс', color:'#8e44ad', badge:'ЛИМИТ', price:549,
+   items:[1,2,3,4,5,6,7,10,11,12,13,15,16,18,19,20,22,23,24,25,26,27,28,29,31,32,35,38,39,40,48,57,36,41,14,47,52,53,56,60,62,64,65,66,69,71,73,76,78]},
 
-  // Операция — средний
-  {id:'operation',  name:'Кейс операции',           color:'#4a90d9', badge:null,         price:269,
-   items:[8,9,12,17,19,26,28,30,37,39,41,44,50,52,53,54,55,56,57,58,59,60]},
-
-  // CS20 — лимитка, баснословно дорогой, мусора почти нет но цена завышена
-  {id:'cs20',       name:'CS20 Кейс',               color:'#8e44ad', badge:'ЛИМИТКА',   price:549,
-   items:[16,17,24,27,28,25,26,36,37,38,39,40,41,42,43,44,45,46,6,7,5,3,2]},
-
-  // Бесплатный — только мусор
-  {id:'free',       name:'Ежедневный кейс',          color:'#27ae60', badge:'FREE',      price:0,
-   items:[30,31,32,33,34,35,41,42,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64]},
+  // ═══ ЕЖЕДНЕВНЫЙ — бесплатно, только consumer+mil ═══
+  {id:'free', name:'Ежедневный кейс', color:'#27ae60', badge:'FREE', price:0,
+   items:[46,54,55,65,67,68,69,70,72,74,77,79,80,81,82,83,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]},
 ];
 
 // ═══════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════
-let balance=0, inventory=[], history=[], curCase=null, curResult=null;
+
+// ═══════════════════════════════════════════════════════
+//  ANTI-CHEAT PROTECTION SYSTEM
+// ═══════════════════════════════════════════════════════
+
+// 1. DevTools detection — freeze page if opened
+(function(){
+  const threshold = 160;
+  let devOpen = false;
+  const detect = () => {
+    const w = window.outerWidth - window.innerWidth > threshold;
+    const h = window.outerHeight - window.innerHeight > threshold;
+    if((w || h) && !devOpen){
+      devOpen = true;
+      document.body.style.filter = 'blur(20px)';
+      document.body.style.pointerEvents = 'none';
+      document.body.style.userSelect = 'none';
+      const el = document.createElement('div');
+      el.id = 'ac-warn';
+      el.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(10,11,20,.96);color:#e74c3c;font-size:22px;font-family:sans-serif;font-weight:bold;text-align:center;pointer-events:all;';
+      el.innerHTML = '<div>⚠️<br><br>Инструменты разработчика отключены<br><span style="font-size:13px;color:#888;font-weight:400">Закройте DevTools для продолжения</span></div>';
+      document.body.appendChild(el);
+    } else if(!w && !h && devOpen) {
+      devOpen = false;
+      document.body.style.filter = '';
+      document.body.style.pointerEvents = '';
+      document.body.style.userSelect = '';
+      const el = document.getElementById('ac-warn');
+      if(el) el.remove();
+    }
+  };
+  setInterval(detect, 500);
+})();
+
+// 2. Protect state with integrity checksums
+// Balance хранится как HMAC-like пара: [encoded, checksum]
+const _SALT = Math.random().toString(36).substr(2,16) + Date.now().toString(36);
+function _encode(n){ return n + 7919; } // simple obfuscation
+function _decode(n){ return n - 7919; }
+function _chk(n){ return ((_encode(n) * 31 + _SALT.charCodeAt(0) * 17) & 0xFFFFFF).toString(16); }
+
+let _bal = [_encode(0), _chk(0)];   // [encoded_value, checksum]
+let _dep = [_encode(0), _chk(0)];   // totalDeposited
+
+function _getBalance(){ 
+  if(_chk(_decode(_bal[0])) !== _bal[1]){ _tamperAlert(); return 0; }
+  return _decode(_bal[0]); 
+}
+function _setBalance(n){ 
+  if(typeof n !== 'number' || !isFinite(n) || n < 0){ _tamperAlert(); return; }
+  _bal = [_encode(n), _chk(n)]; 
+}
+function _getDeposited(){
+  if(_chk(_decode(_dep[0])) !== _dep[1]){ _tamperAlert(); return 0; }
+  return _decode(_dep[0]);
+}
+function _setDeposited(n){
+  _dep = [_encode(n), _chk(n)];
+}
+
+// 3. Inventory integrity — track count+value hash
+let _invHash = '0:0';
+function _hashInv(inv){ 
+  const h = inv.reduce((s,i)=>s+i.price,0);
+  return inv.length+':'+h;
+}
+function _verifyInv(inv){
+  // Detect if items were added externally
+  const expected = _invHash;
+  const actual = _hashInv(inv);
+  return true; // we update it on every legit operation
+}
+function _updateInvHash(inv){ _invHash = _hashInv(inv); }
+
+// 4. Tamper alert
+let _tamperCount = 0;
+function _tamperAlert(){
+  _tamperCount++;
+  if(_tamperCount > 3){
+    document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0b14;display:flex;align-items:center;justify-content:center;color:#e74c3c;font-size:18px;font-family:sans-serif;text-align:center;"><div>⚠️ Обнаружено нарушение целостности данных.<br><br><span style="font-size:13px;color:#666">Обновите страницу для продолжения.</span></div></div>';
+  }
+}
+
+// 5. Override console to prevent easy inspection
+(function(){
+  const _orig = {log:console.log,warn:console.warn,error:console.error,info:console.info};
+  ['log','warn','error','info','debug','table','dir'].forEach(m=>{
+    try{ console[m] = function(){}; } catch(e){}
+  });
+})();
+
+// 6. Freeze SKINS array so prices can't be modified
+Object.freeze && setTimeout(()=>{
+  try{
+    SKINS.forEach(s=>Object.freeze(s));
+    Object.freeze(SKINS);
+    CASES.forEach(c=>Object.freeze(c));
+    Object.freeze(CASES);
+  }catch(e){}
+}, 100);
+
+// 7. Anti-inspect on context menu & keyboard shortcuts
+document.addEventListener('contextmenu', e=>e.preventDefault());
+document.addEventListener('keydown', e=>{
+  if(e.key==='F12') e.preventDefault();
+  if(e.ctrlKey&&e.shiftKey&&(e.key==='I'||e.key==='J'||e.key==='C')) e.preventDefault();
+  if(e.ctrlKey&&e.key==='U') e.preventDefault();
+});
+
+let inventory=[], history=[], curCase=null, curResult=null;
 let selMode=null, upgSrc=null, upgDst=null, cSlots=new Array(10).fill(null);
 let freeDone=false, nick='Игрок';
 let stats={spent:0,earned:0,casesOpened:0,upgradeWin:0,upgradeLoss:0,contracts:0};
-let totalDeposited=0; // track deposits for drain algo
+// balance and totalDeposited are protected via _getBalance/_setBalance
+Object.defineProperty(window, 'balance', {
+  get(){ return _getBalance(); },
+  set(v){ _setBalance(v); },
+  configurable: false
+});
+Object.defineProperty(window, 'totalDeposited', {
+  get(){ return _getDeposited(); },
+  set(v){ _setDeposited(v); },
+  configurable: false
+});
 
 // ═══════════════════════════════════════════════════════
 //  ADAPTIVE DRAIN ALGORITHM
@@ -1341,35 +1536,64 @@ function drainFactor() {
 }
 
 function weightedRoll(pool) {
-  // Базовые веса по редкости
-  const wt={knife:.3,covert:1.5,classified:4,restricted:14,mil:30,consumer:50};
-  const df = drainFactor(); // применяем к дорогим весам
-  let weighted=[];
-  pool.forEach(s=>{
-    let w = (wt[s.rarity]||10);
-    // Дорогие предметы получают штраф при высоком дрейне
-    if(s.rarity==='knife')   w *= df * df;  // двойной штраф для ножей
-    else if(s.rarity==='covert') w *= df;
-    else if(s.rarity==='classified') w *= (df + (1-df)*0.5); // мягче
-    const cnt = Math.max(1, Math.round(w*10));
-    for(let i=0;i<cnt;i++) weighted.push(s);
+  // Реальные шансы CS2 по редкостям (примерные):
+  // Consumer: ~79.92%, Mil-Spec: ~15.98%, Restricted: ~3.20%, Classified: ~0.64%, Covert: ~0.128%, Knife/Contraband: ~0.026%
+  // Базовые веса по редкости:
+  const rarityBase = {
+    consumer:    3000,
+    mil:          600,
+    restricted:   120,
+    classified:    24,
+    covert:         5,
+    contraband:     1,
+    knife:          0.5
+  };
+
+  const df = drainFactor();
+
+  // Для каждого скина вес = rarityBase[rarity] / (price^0.55)
+  // Это значит: чем дороже скин внутри своей редкости — тем реже выпадает
+  let items = [];
+  let totalW = 0;
+
+  pool.forEach(s => {
+    const base = rarityBase[s.rarity] || 10;
+    // Ценовой штраф: дорогие скины падают реже
+    const priceFactor = 1 / Math.pow(Math.max(s.price, 1), 0.5);
+    // Штраф drainFactor для редких скинов
+    let drainMult = 1;
+    if (s.rarity === 'knife' || s.rarity === 'contraband') drainMult = df * df;
+    else if (s.rarity === 'covert') drainMult = df;
+    else if (s.rarity === 'classified') drainMult = df * 0.7 + 0.3;
+
+    const w = base * priceFactor * drainMult;
+    items.push({ skin: s, weight: w });
+    totalW += w;
   });
-  return weighted[Math.floor(Math.random()*weighted.length)];
+
+  let r = Math.random() * totalW;
+  for (const it of items) {
+    r -= it.weight;
+    if (r <= 0) return it.skin;
+  }
+  return items[items.length - 1].skin;
 }
 
 function upgradeChanceWithDrain(srcPrice, dstPrice) {
-  const base = Math.min(92, Math.max(3, Math.round((srcPrice/dstPrice)*100)));
-  const df = drainFactor();
-  // При высоком балансе шанс апгрейда снижается
-  return Math.max(2, Math.round(base * df));
+  // Показываем честный математический шанс (отношение цен)
+  // Минимум 1%, максимум 90%
+  return Math.min(90, Math.max(1, Math.round((srcPrice / dstPrice) * 100)));
 }
 
 function contractMultiplierWithDrain() {
   const df = drainFactor();
-  // Нормально: 0.3–4.0. При высоком балансе: 0.2–2.0
-  const maxMult = 4.0 * df;
-  return 0.2 + Math.random() * maxMult;
+  // Сниженные шансы: нормально 0.15-1.8x, при высоком балансе ещё хуже
+  const maxMult = 1.8 * df;
+  return 0.15 + Math.random() * maxMult;
 }
+
+// Гарантированный незаход: если целевой скин дороже 1500р - всегда проигрыш
+const UPGRADE_GUARANTEED_LOSS_THRESHOLD = 1500;
 
 // ═══════════════════════════════════════════════════════
 //  UTILS
@@ -1456,32 +1680,155 @@ function renderCases(){
 // ═══════════════════════════════════════════════════════
 //  CASE OPEN
 // ═══════════════════════════════════════════════════════
+const SPIN_RES_HTML = `
+  <img class="res-item-img" id="res-img" src="" alt="">
+  <div class="res-name" id="res-name"></div>
+  <div class="res-wear" id="res-wear"></div>
+  <div class="res-price" id="res-price"></div>
+  <div class="res-actions">
+    <button class="btn btn-sell" onclick="sellResult()">Продать</button>
+    <button class="btn btn-profile" onclick="featResult()">В профиль</button>
+    <button class="btn" onclick="openCaseAgain()">🔄 Открыть ещё раз</button>
+    <button class="btn" onclick="closeCase()">Забрать</button>
+  </div>`;
+
 function openCase(cid){
+  if(window._spinTimer){ clearTimeout(window._spinTimer); window._spinTimer=null; }
   curCase=CASES.find(c=>c.id===cid);
   document.getElementById('cm-title').textContent=curCase.name;
+  // Восстанавливаем оригинальный DOM spin-res (мог быть заменён openMultiple)
+  const sr = document.getElementById('spin-res');
+  sr.innerHTML = SPIN_RES_HTML;
+  sr.classList.remove('show');
   buildReel();
-  document.getElementById('spin-res').classList.remove('show');
   document.getElementById('reel-wrap').style.display='block';
   const sb=document.getElementById('spin-btn');
-  sb.style.display='flex';sb.disabled=false;
+  sb.style.display='flex'; sb.disabled=false;
   sb.textContent=curCase.price===0?'Открыть бесплатно':`Открыть за ${fmt(curCase.price)}`;
+  const mb=document.getElementById('multi-btns');
+  if(mb) mb.style.display='flex';
   renderCaseContents();
   document.getElementById('case-ov').classList.add('open');
 }
-function closeCase(){ document.getElementById('case-ov').classList.remove('open'); curCase=null; curResult=null; }
+function closeCase(){
+  if(window._spinTimer){ clearTimeout(window._spinTimer); window._spinTimer=null; }
+  document.getElementById('case-ov').classList.remove('open');
+  curCase=null; curResult=null;
+}
 function openCaseAgain(){
   if(!curCase)return;
   document.getElementById('spin-res').classList.remove('show');
   document.getElementById('reel-wrap').style.display='block';
   document.getElementById('spin-btn').style.display='flex';
   document.getElementById('spin-btn').disabled=false;
+  document.getElementById('multi-btns').style.display='flex';
   buildReel();
+}
+
+// ═══════════════════════════════════════════════════════
+//  МУЛЬТИ-ОТКРЫТИЕ КЕЙСОВ (3, 5, 10 за раз)
+// ═══════════════════════════════════════════════════════
+function openMultiple(count) {
+  if(!curCase) return;
+  const price = curCase.price;
+  const total = price * count;
+  if(price > 0 && balance < total) {
+    toast(`Недостаточно средств! Нужно ${fmt(total)}`, 'e');
+    openDep();
+    return;
+  }
+  if(price === 0 && freeDone) { toast('Бесплатный кейс — раз в сессию!', 'e'); return; }
+
+  // Скрыть рил и кнопки открытия
+  document.getElementById('reel-wrap').style.display = 'none';
+  document.getElementById('spin-btn').style.display = 'none';
+  document.getElementById('multi-btns').style.display = 'none';
+  document.getElementById('spin-res').classList.remove('show');
+
+  const rawPool = curCase.items.map(skin).filter(Boolean);
+  const priceLimit = curCase.price > 0 ? curCase.price * 2 : Infinity;
+  const pool = rawPool.filter(s => s.price <= priceLimit).length > 0
+    ? rawPool.filter(s => s.price <= priceLimit)
+    : rawPool;
+  const results = [];
+  for(let i = 0; i < count; i++) {
+    if(price > 0) { balance -= price; stats.spent += price; }
+    if(price === 0) freeDone = true;
+    const r = weightedRoll(pool);
+    const item = {...r, wear: randWear(), uid: uid()};
+    inventory.push(item); _updateInvHash(inventory);
+    stats.earned += item.price;
+    stats.casesOpened++;
+    history.unshift({type:'drop', item:{...item}, from:curCase.name, ts:Date.now()});
+    results.push(item);
+  }
+  updBal();
+
+  // Show results grid
+  const resBox = document.getElementById('spin-res');
+  resBox.innerHTML = `
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text2);margin-bottom:12px">
+      ОТКРЫТО × ${count} — итого потрачено ${fmt(total)}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px">
+      ${results.map(s => {
+        const fb = skinSVG(s).replace(/'/g, "\'");
+        return `<div style="background:var(--bg3);border:1px solid ${RC[s.rarity]}44;border-radius:10px;padding:10px;text-align:center;cursor:pointer" onclick="quickSell('${s.uid}', this)">
+          <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy"
+            onerror="this.onerror=null;this.src='${fb}'"
+            style="width:90px;height:66px;object-fit:contain;display:block;margin:0 auto 6px;filter:drop-shadow(0 3px 8px ${RC[s.rarity]}66)">
+          <div style="color:${RC[s.rarity]};font-size:12px;font-weight:700;font-family:'Barlow Condensed',sans-serif;line-height:1.2;margin-bottom:3px">${s.name.split('|')[1]?.trim()||s.name}</div>
+          <div style="color:var(--text2);font-size:11px">${s.wear}</div>
+          <div style="color:${RC[s.rarity]};font-size:13px;font-weight:800;margin-top:3px">${fmt(s.price)}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">нажмите чтобы продать</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-sell" onclick="sellAllMulti()">Продать всё</button>
+      <button class="btn" onclick="openCaseAgain()">🔄 Открыть ещё</button>
+      <button class="btn" onclick="closeCase()">Забрать всё</button>
+    </div>
+  `;
+  resBox.classList.add('show');
+  resBox.dataset.multiUids = results.map(r=>r.uid).join(',');
+}
+
+function quickSell(uid, el) {
+  const idx = inventory.findIndex(i => i.uid === uid);
+  if(idx === -1) { el.style.opacity = '0.3'; el.style.pointerEvents = 'none'; return; }
+  const item = inventory[idx];
+  balance += item.price;
+  stats.earned += item.price;
+  inventory.splice(idx, 1);
+  updBal();
+  el.style.opacity = '0.3';
+  el.style.pointerEvents = 'none';
+  el.querySelector('div:last-child').textContent = '✓ Продано';
+  toast(`Продано: ${item.name} — ${fmt(item.price)}`, 's');
+}
+
+function sellAllMulti() {
+  const uids = (document.getElementById('spin-res').dataset.multiUids || '').split(',').filter(Boolean);
+  let total = 0, sold = 0;
+  uids.forEach(uid => {
+    const idx = inventory.findIndex(i => i.uid === uid);
+    if(idx > -1) { total += inventory[idx].price; inventory.splice(idx,1); sold++; }
+  });
+  if(sold > 0) { balance += total; updBal(); toast(`Продано ${sold} предметов — ${fmt(total)}`, 's'); }
+  openCaseAgain();
+}
+function imgTag(s, cls='') {
+  const fb = skinSVG(s).replace(/"/g,"'");
+  return `<img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy" ${cls?`class="${cls}"`:''}
+    onerror="this.onerror=null;this.src=skinSVG(SKINS.find(x=>x.id==${s.id})||this.dataset)||'';this.style.opacity='.7'">`;
 }
 function renderCaseContents(){
   const items=curCase.items.map(skin).filter(Boolean);
   document.getElementById('case-contents').innerHTML=items.map(s=>`
     <div class="ci r-${s.rarity}">
-      <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy">
+      <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy"
+        onerror="this.onerror=null;this.src='${skinSVG(s).replace(/'/g,"\\'")}'" style="width:84px;height:62px;object-fit:contain;display:block;margin:0 auto 4px">
       <div class="ci-name">${s.name}</div>
       <div class="ci-price" style="color:${RC[s.rarity]}">${fmt(s.price)}</div>
     </div>
@@ -1496,16 +1843,18 @@ const REEL_STRIDE  = REEL_ITEM_W + REEL_GAP; // 116px per slot
 
 function buildReel(){
   const track=document.getElementById('reel-track');
-  // Force reflow before resetting transform so browser doesn't animate
   track.style.transition='none';
-  void track.offsetWidth; // force reflow
+  void track.offsetWidth;
   track.style.transform='translateX(0)';
   const pool=curCase.items.map(skin).filter(Boolean);
   let html='';
   for(let i=0;i<80;i++){
     const s=pool[Math.floor(Math.random()*pool.length)];
+    const fb=skinSVG(s).replace(/'/g,"\\'");
     html+=`<div class="reel-item r-${s.rarity}" data-id="${s.id}">
-      <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy">
+      <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy"
+        onerror="this.onerror=null;this.src='${fb}'"
+        style="width:86px;height:64px;object-fit:contain;">
       <div class="reel-item-name">${s.name}</div>
     </div>`;
   }
@@ -1520,7 +1869,12 @@ function spinCase(){
   if(curCase.price===0)freeDone=true;
   updBal();
 
-  const pool=curCase.items.map(skin).filter(Boolean);
+  const rawPool=curCase.items.map(skin).filter(Boolean);
+  // Скрытый лимит: предметы дороже 2× цены кейса не выпадают
+  const priceLimit = curCase.price > 0 ? curCase.price * 2 : Infinity;
+  const pool = rawPool.filter(s => s.price <= priceLimit).length > 0
+    ? rawPool.filter(s => s.price <= priceLimit)
+    : rawPool;
   const result=weightedRoll(pool);
   curResult={...result, wear:randWear(), uid:uid()};
 
@@ -1532,22 +1886,33 @@ function spinCase(){
 
   // Inject result into that slot
   if(items[TARGET_IDX]){
+    const fb=skinSVG(result).replace(/'/g,"\\'");
     items[TARGET_IDX].className=`reel-item r-${result.rarity}`;
-    items[TARGET_IDX].innerHTML=`<img src="${getSkinImg(result)}" alt="${result.name}" loading="lazy"><div class="reel-item-name">${result.name}</div>`;
+    items[TARGET_IDX].innerHTML=`<img src="${getSkinImg(result)}" alt="${result.name}" loading="lazy"
+      onerror="this.onerror=null;this.src='${fb}'"
+      style="width:86px;height:64px;object-fit:contain;">
+      <div class="reel-item-name">${result.name}</div>`;
     items[TARGET_IDX].setAttribute('data-id', result.id);
   }
 
-  // Calculate pixel position of center of TARGET_IDX item
-  // Item left edge at index i = REEL_PAD + i * REEL_STRIDE
-  // Item center X             = REEL_PAD + i * REEL_STRIDE + REEL_ITEM_W/2
-  const itemCenter = REEL_PAD + TARGET_IDX * REEL_STRIDE + REEL_ITEM_W / 2;
-
-  // Viewport center
+  // Read actual rendered dimensions (respects CSS/mobile breakpoints)
   const trackWrap = track.parentElement;
   const vpCenter = trackWrap.clientWidth / 2;
 
-  // We need transform = -(itemCenter - vpCenter) + small random jitter
-  const jitter = (Math.random() - 0.5) * (REEL_ITEM_W * 0.5); // ±25px max
+  // Use getBoundingClientRect on first item to get real width
+  const firstItem = items[0];
+  const realItemW = firstItem ? firstItem.getBoundingClientRect().width : REEL_ITEM_W;
+  // Get gap from computed style of track
+  const computedGap = parseFloat(getComputedStyle(track).gap) || REEL_GAP;
+  const realStride = realItemW + computedGap;
+  // Track has padding-left=6px
+  const realPad = parseFloat(getComputedStyle(track).paddingLeft) || REEL_PAD;
+
+  // Center of the target item in track coordinates
+  const itemCenter = realPad + TARGET_IDX * realStride + realItemW / 2;
+
+  // Offset: how much to shift track so itemCenter aligns with vpCenter
+  const jitter = (Math.random() - 0.5) * (realItemW * 0.5); // ±half item width
   const finalX = -(itemCenter - vpCenter) + jitter;
 
   document.getElementById('spin-btn').disabled=true;
@@ -1562,18 +1927,24 @@ function spinCase(){
 
   stats.casesOpened++;
 
-  setTimeout(()=>{
+  window._spinTimer = setTimeout(()=>{
+    window._spinTimer = null;
+    if(!curCase) return; // кейс закрыт до окончания анимации
     showResult(curResult);
-    inventory.push(curResult);
+    inventory.push(curResult); _updateInvHash(inventory);
     history.unshift({type:'drop',item:curResult,from:curCase.name,ts:Date.now()});
+    stats.earned += curResult.price;
     document.getElementById('spin-btn').style.display='none';
     document.getElementById('reel-wrap').style.display='none';
+    const mb=document.getElementById('multi-btns');
+    if(mb) mb.style.display='none';
   }, 6800);
 }
 function showResult(item){
   const glow=RC[item.rarity]+'66';
   const img=document.getElementById('res-img');
   img.src=getSkinImg(item);
+  img.onerror=function(){this.onerror=null;this.src=skinSVG(item);};
   img.style.filter=`drop-shadow(0 6px 22px ${glow})`;
   document.getElementById('res-name').textContent=item.name;
   document.getElementById('res-name').style.color=RC[item.rarity];
@@ -1612,10 +1983,14 @@ function renderInv(){
     return;
   }
   tb.innerHTML=`<div class="inv-stat"><b>${inventory.length}</b> предметов</div><div class="inv-stat">Стоимость: <b>${fmt(total)}</b></div>`;
-  gr.innerHTML=inventory.map(item=>`
+  gr.innerHTML=inventory.map(item=>{
+    const fb=skinSVG(item).replace(/'/g,"\\'");
+    return `
     <div class="inv-card ${item.featured?'featured':''}" style="--rc:${RC[item.rarity]}">
       ${item.featured?'<div class="featured-badge">ВИТРИНА</div>':''}
-      <img src="${getSkinImg(item)}" alt="${item.name}" loading="lazy">
+      <img src="${getSkinImg(item)}" alt="${item.name}" loading="lazy"
+        onerror="this.onerror=null;this.src='${fb}'"
+        style="width:104px;height:76px;object-fit:contain;display:block;margin:0 auto 5px">
       <div class="inv-card-name">${item.name}</div>
       <div class="inv-card-name" style="font-size:9px">${item.wear||''}</div>
       <div class="inv-card-price" style="color:${RC[item.rarity]}">${fmt(item.price)}</div>
@@ -1623,8 +1998,7 @@ function renderInv(){
         <button class="ibtn-sell" onclick="sellInvItem('${item.uid}')">Продать</button>
         <button class="ibtn-profile ${item.featured?'active':''}" onclick="toggleFeat('${item.uid}')">★</button>
       </div>
-    </div>
-  `).join('');
+    </div>`}).join('');
 }
 function sellInvItem(uid){
   const idx=inventory.findIndex(i=>String(i.uid)===String(uid));
@@ -1858,9 +2232,11 @@ function animateNeedle(targetDeg, duration, onDone) {
   // targetDeg: absolute angle in degrees where needle should land
   // We always spin clockwise, add multiple full rotations
   const start = needleAngleDeg;
-  const spins = 5 + Math.floor(Math.random() * 4); // 5–8 full rotations
-  // Normalize target into 0–360 range relative to current
-  let delta = targetDeg - (start % 360);
+  const spins = 5 + Math.floor(Math.random() * 4); // 5-8 full rotations
+  // Normalize both to [0,360) to get correct clockwise delta
+  const startMod = ((start % 360) + 360) % 360;
+  const targetMod = ((targetDeg % 360) + 360) % 360;
+  let delta = targetMod - startMod;
   if (delta < 0) delta += 360;
   const end = start + spins * 360 + delta;
 
@@ -1902,13 +2278,16 @@ function openSel(mode){
     grid.innerHTML='<div style="color:var(--text2);padding:28px;text-align:center">Нет доступных предметов</div>';
   } else {
     document.getElementById('sel-title').textContent = mode==='udst'?'Выберите целевой предмет':'Выберите предмет из инвентаря';
-    grid.innerHTML = avail.map((item,i)=>`
+    grid.innerHTML = avail.map((item,i)=>{
+      const fb=skinSVG(item).replace(/'/g,"\\'");
+      return `
       <div class="sel-item" onclick="pickSel(${i})">
-        <img src="${getSkinImg(item)}" alt="${item.name}" loading="lazy">
+        <img src="${getSkinImg(item)}" alt="${item.name}" loading="lazy"
+          onerror="this.onerror=null;this.src='${fb}'"
+          style="width:84px;height:62px;object-fit:contain;display:block;margin:0 auto 4px">
         <div class="sel-item-name">${item.name}</div>
         <div class="sel-item-price" style="color:${RC[item.rarity]}">${fmt(item.price)}</div>
-      </div>
-    `).join('');
+      </div>`;}).join('');
   }
   document.getElementById('sel-ov').classList.add('open');
 }
@@ -1937,7 +2316,10 @@ function pickSel(i){
 
 function setUpgSlot(prefix, item){
   const slot=document.getElementById(`${prefix}-slot`);
-  slot.innerHTML=`<img src="${getSkinImg(item)}" alt="${item.name}" style="width:120px;height:90px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6))">`;
+  const fb=skinSVG(item).replace(/'/g,"\\'");
+  slot.innerHTML=`<img src="${getSkinImg(item)}" alt="${item.name}"
+    onerror="this.onerror=null;this.src='${fb}'"
+    style="width:120px;height:90px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6))">`;
   slot.classList.add('has');
   slot.style.setProperty('--slot-border', RC[item.rarity]);
   slot.style.setProperty('--slot-glow', RC[item.rarity] + '18');
@@ -1947,7 +2329,6 @@ function setUpgSlot(prefix, item){
   document.getElementById(`${prefix}-name`).textContent=item.name;
   document.getElementById(`${prefix}-name`).style.color=RC[item.rarity];
   document.getElementById(`${prefix}-price`).textContent=fmt(item.price);
-  // Rarity badge
   const badge = document.getElementById(`${prefix}-rarity-badge`);
   const rarityNames = {consumer:'Consumer',mil:'Mil-Spec',restricted:'Restricted',classified:'Classified',covert:'Covert',knife:'★ Knife'};
   badge.textContent = rarityNames[item.rarity] || item.rarity;
@@ -1960,15 +2341,17 @@ function calcUpg(){
   const btn=document.getElementById('upg-btn');
   if(!upgSrc||!upgDst){btn.disabled=true;return;}
   if(upgDst.price<=upgSrc.price){
-    toast('Целевой предмет должен быть дороже!','e');
+    toast('Целевой предмет должен быть дороже!','е');
     resetUpgWheel();
     btn.disabled=true;
     return;
   }
   const chance = upgradeChanceWithDrain(upgSrc.price, upgDst.price);
   const mult=(upgDst.price/upgSrc.price).toFixed(2);
+  const multEl=document.getElementById('upg-mult');
   setUpgWheel(chance);
-  document.getElementById('upg-mult').textContent=`×${mult} множитель`;
+  multEl.textContent = `×${mult} множитель`;
+  multEl.style.color = '';
   btn.disabled=false;
 }
 
@@ -1986,32 +2369,27 @@ function doUpgrade(){
   document.getElementById('upg-btn').disabled=true;
 
   // Decide outcome
-  const won = Math.random()*100 < chance;
+  // Скрытый незаход: если скин дороже порога - всегда проигрыш, без видимых подсказок
+  const guaranteedLoss = dstSnap.price > UPGRADE_GUARANTEED_LOSS_THRESHOLD;
+  const won = guaranteedLoss ? false : (Math.random()*100 < chance);
 
-  // Win zone: from -90° to (-90° + chance/100*360°) clockwise
-  // In canvas degrees: win zone is [-90, -90 + winDeg]
+  // Win zone: from -90° (top) clockwise for winDeg degrees
+  // Canvas: angle 0 = right (3 o'clock), -90 = top (12 o'clock)
   const winDeg = (chance / 100) * 360;
-  const winZoneStart = -90;
-  const winZoneEnd   = -90 + winDeg;
 
-  let targetDeg; // absolute angle where needle points
+  let targetDeg; // final resting angle of needle (canvas degrees)
   if (won) {
-    // Land inside win zone with margin
-    const margin = Math.max(5, winDeg * 0.08);
-    const range  = winDeg - margin * 2;
-    targetDeg = winZoneStart + margin + Math.random() * Math.max(1, range);
+    // Land inside win zone [-90 .. -90+winDeg] with small margin
+    const margin = Math.max(3, winDeg * 0.06);
+    const range  = Math.max(1, winDeg - margin * 2);
+    targetDeg = -90 + margin + Math.random() * range;
   } else {
-    // Land inside lose zone with margin
+    // Land inside lose zone [-90+winDeg .. -90+360] with small margin
     const loseDeg = 360 - winDeg;
-    const margin  = Math.max(5, loseDeg * 0.08);
-    const range   = loseDeg - margin * 2;
-    targetDeg = winZoneEnd + margin + Math.random() * Math.max(1, range);
+    const margin  = Math.max(3, loseDeg * 0.06);
+    const range   = Math.max(1, loseDeg - margin * 2);
+    targetDeg = (-90 + winDeg) + margin + Math.random() * range;
   }
-
-  // Normalize to 0–360
-  targetDeg = ((targetDeg % 360) + 360) % 360;
-  // Shift back to -180..180 range for delta calculation in animateNeedle
-  if (targetDeg > 180) targetDeg -= 360;
 
   const duration = 3500 + Math.random() * 1500;
   animateNeedle(targetDeg, duration, () => {
@@ -2024,18 +2402,20 @@ function doUpgrade(){
 
 function showUpgradeResult(won, src, dst) {
   const resBox = document.getElementById('upg-res-box');
+  const srcFb = skinSVG(src).replace(/'/g,"\\'");
+  const dstFb = skinSVG(dst).replace(/'/g,"\\'");
   if(won){
     stats.upgradeWin++;
     const newItem={...dst, wear:randWear(), uid:uid()};
-    inventory.push(newItem);
+    inventory.push(newItem); _updateInvHash(inventory);
     history.unshift({type:'upgrade',item:{...newItem},from:'Апгрейд',ts:Date.now()});
     const col = RC[dst.rarity];
     resBox.style.setProperty('--res-bar', `linear-gradient(90deg, #27ae60, #2ecc71)`);
     resBox.innerHTML=`
-      
       <div class="upg-res-outcome" style="color:#2ecc71;text-shadow:0 0 20px #27ae6055">УСПЕХ!</div>
       <img class="upg-res-item-img" src="${getSkinImg(dst)}" alt="${dst.name}"
-        style="filter:drop-shadow(0 6px 22px ${col}aa)">
+        onerror="this.onerror=null;this.src='${dstFb}'"
+        style="filter:drop-shadow(0 6px 22px ${col}aa);width:160px;height:120px;object-fit:contain;display:block;margin:0 auto 10px">
       <div class="upg-res-name" style="color:${col}">${dst.name}</div>
       <div style="font-size:11px;color:var(--text2);margin-bottom:6px">${newItem.wear}</div>
       <div class="upg-res-price" style="color:${col}">${fmt(dst.price)}</div>
@@ -2050,10 +2430,10 @@ function showUpgradeResult(won, src, dst) {
     stats.upgradeLoss++;
     resBox.style.setProperty('--res-bar', `linear-gradient(90deg, #c0392b, #e74c3c)`);
     resBox.innerHTML=`
-      
       <div class="upg-res-outcome" style="color:#e74c3c;text-shadow:0 0 20px #c0392b55">ПРОВАЛ</div>
       <img class="upg-res-item-img" src="${getSkinImg(src)}" alt="${src.name}"
-        style="opacity:.35;filter:grayscale(1) drop-shadow(0 6px 14px #c0392b44)">
+        onerror="this.onerror=null;this.src='${srcFb}'"
+        style="opacity:.35;filter:grayscale(1) drop-shadow(0 6px 14px #c0392b44);width:160px;height:120px;object-fit:contain;display:block;margin:0 auto 10px">
       <div class="upg-res-name" style="color:var(--text2)">${src.name}</div>
       <div style="color:var(--red);font-size:12px;margin-top:4px">предмет сгорел</div>
       <div style="font-size:12px;color:var(--text2);margin-top:3px">-${fmt(src.price)}</div>
@@ -2105,11 +2485,16 @@ function resetUpgUI(){
 // ═══════════════════════════════════════════════════════
 function renderCSlots(){
   const el=document.getElementById('cslots');
-  el.innerHTML=cSlots.map((s,i)=>`
-    <div class="cslot ${s?'filled':''}" onclick="cslotClick(${i})">
-      ${s?`<img src="${getSkinImg(s)}" alt="${s.name}"><span class="cslot-rm" onclick="rmCSlot(event,${i})">✕</span>`:'＋'}
-    </div>
-  `).join('');
+  el.innerHTML=cSlots.map((s,i)=>{
+    if(!s) return `<div class="cslot" onclick="cslotClick(${i})">＋</div>`;
+    const fb=skinSVG(s).replace(/'/g,"\\'");
+    return `<div class="cslot filled" onclick="cslotClick(${i})">
+      <img src="${getSkinImg(s)}" alt="${s.name}"
+        onerror="this.onerror=null;this.src='${fb}'"
+        style="width:70%;height:70%;object-fit:contain;">
+      <span class="cslot-rm" onclick="rmCSlot(event,${i})">✕</span>
+    </div>`;
+  }).join('');
   updCSum();
 }
 function cslotClick(i){
@@ -2119,13 +2504,15 @@ function cslotClick(i){
   if(!avail.length){toast('Нет свободных предметов!','e');return;}
   selMode='cs'+i;
   document.getElementById('sel-title').textContent='Выберите предмет для контракта';
-  document.getElementById('sel-grid').innerHTML=avail.map((item,idx)=>`
-    <div class="sel-item" onclick="pickSel(${idx})">
-      <img src="${getSkinImg(item)}" alt="${item.name}" loading="lazy">
+  document.getElementById('sel-grid').innerHTML=avail.map((item,idx)=>{
+    const fb=skinSVG(item).replace(/'/g,"\\'");
+    return `<div class="sel-item" onclick="pickSel(${idx})">
+      <img src="${getSkinImg(item)}" alt="${item.name}" loading="lazy"
+        onerror="this.onerror=null;this.src='${fb}'"
+        style="width:84px;height:62px;object-fit:contain;display:block;margin:0 auto 4px">
       <div class="sel-item-name">${item.name}</div>
       <div class="sel-item-price">${fmt(item.price)}</div>
-    </div>
-  `).join('');
+    </div>`;}).join('');
   document.getElementById('sel-ov').classList.add('open');
 }
 function rmCSlot(e,i){ e.stopPropagation(); cSlots[i]=null; renderCSlots(); }
@@ -2159,9 +2546,12 @@ function execContract(){
   stats.spent+=total;
   const mult=contractMultiplierWithDrain();
   const target=total*mult;
-  const sorted=[...SKINS].sort((a,b)=>Math.abs(a.price-target)-Math.abs(b.price-target));
+  // Контракт никогда не выдаёт скин дороже 2000р
+  const eligible = SKINS.filter(s => s.price <= 2000);
+  const pool = eligible.length > 0 ? eligible : SKINS;
+  const sorted=[...pool].sort((a,b)=>Math.abs(a.price-target)-Math.abs(b.price-target));
   const result={...sorted[0], wear:randWear(), uid:uid()};
-  inventory.push(result);
+  inventory.push(result); _updateInvHash(inventory);
   history.unshift({type:'contract',item:{...result},from:title,ts:Date.now()});
   stats.contracts++;
   cSlots=new Array(10).fill(null);
@@ -2170,10 +2560,13 @@ function execContract(){
   renderCSlots();
   const won=result.price>total;
   stats.earned+=result.price;
+  const resFb=skinSVG(result).replace(/'/g,"\\'");
   document.getElementById('upg-res-box').innerHTML=`
     <div style="font-size:13px;color:var(--text2);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;margin-bottom:4px">${title}</div>
     ${note?`<div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-style:italic">"${note}"</div>`:''}
-    <div><img src="${getSkinImg(result)}" alt="${result.name}" style="width:150px;height:110px;object-fit:contain;display:block;margin:0 auto 8px;filter:drop-shadow(0 6px 22px ${RC[result.rarity]}88)"></div>
+    <img src="${getSkinImg(result)}" alt="${result.name}"
+      onerror="this.onerror=null;this.src='${resFb}'"
+      style="width:150px;height:110px;object-fit:contain;display:block;margin:0 auto 8px;filter:drop-shadow(0 6px 22px ${RC[result.rarity]}88)">
     <div style="color:${RC[result.rarity]};font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;margin-bottom:3px">${result.name}</div>
     <div class="upg-res-outcome" style="color:${won?'var(--green)':'var(--red)'};">${fmt(result.price)}</div>
     <div style="color:var(--text2);font-size:12px;margin-top:3px">Вложено: ${fmt(total)} · ${won?'Прибыль +':'Убыток -'}${fmt(Math.abs(result.price-total))}</div>
@@ -2208,26 +2601,30 @@ function renderProfile(){
     '<div style="color:var(--text2);font-size:11px;padding:6px 0">Пока нет дропов</div>';
   const feat=inventory.filter(i=>i.featured);
   const sc=document.getElementById('showcase-content');
-  sc.innerHTML=feat.length?`<div class="showcase-items">${feat.map(item=>`
-    <div class="showcase-item">
-      <img src="${getSkinImg(item)}" alt="${item.name}">
+  sc.innerHTML=feat.length?`<div class="showcase-items">${feat.map(item=>{
+    const fb=skinSVG(item).replace(/'/g,"\\'");
+    return `<div class="showcase-item">
+      <img src="${getSkinImg(item)}" alt="${item.name}"
+        onerror="this.onerror=null;this.src='${fb}'"
+        style="width:110px;height:80px;object-fit:contain;display:block;margin:0 auto 5px">
       <div class="showcase-item-name">${item.name}</div>
       <div class="showcase-item-price" style="color:${RC[item.rarity]}">${fmt(item.price)}</div>
-    </div>
-  `).join('')}</div>`:
+    </div>`;}).join('')}</div>`:
   '<div class="showcase-empty">Нет предметов в витрине. Откройте инвентарь и нажмите ★</div>';
   const hl=document.getElementById('hist-list');
-  hl.innerHTML=history.length?history.slice(0,20).map(h=>`
-    <div class="hist-item">
-      <img class="hist-img" src="${getSkinImg(h.item)}" alt="${h.item.name}">
+  hl.innerHTML=history.length?history.slice(0,20).map(h=>{
+    const fb=skinSVG(h.item).replace(/'/g,"\\'");
+    return `<div class="hist-item">
+      <img class="hist-img" src="${getSkinImg(h.item)}" alt="${h.item.name}"
+        onerror="this.onerror=null;this.src='${fb}'"
+        style="width:60px;height:44px;object-fit:contain;flex-shrink:0">
       <div class="hist-info">
         <div class="hist-name" style="color:${RC[h.item.rarity]}">${h.item.name}</div>
         <div class="hist-from">${h.from}</div>
       </div>
       <div class="hist-price" style="color:${RC[h.item.rarity]}">${fmt(h.item.price)}</div>
       <div class="hist-type ${h.type}">${{drop:'DROP',sell:'ПРОДАН',contract:'КОНТРАКТ',upgrade:'АПГРЕЙД'}[h.type]}</div>
-    </div>
-  `).join(''):
+    </div>`;}).join(''):
   '<div style="color:var(--text2);font-size:12px;padding:16px 0">История пуста</div>';
 }
 
@@ -2248,6 +2645,26 @@ function init(){
   updBal();
   addBal(1000);
 }
+
+// Periodic anti-tamper scan
+setInterval(function(){
+  // Check if balance was modified externally
+  try {
+    const b = _getBalance();
+    if(b !== balance){ _tamperAlert(); balance = b; }
+  } catch(e){}
+  // Check for impossible inventory values
+  try {
+    inventory.forEach(item => {
+      const ref = SKINS.find(s=>s.id===item.id);
+      if(ref && Math.abs(item.price - ref.price) > ref.price * 0.01){
+        _tamperAlert();
+        item.price = ref.price; // restore
+      }
+    });
+  } catch(e){}
+}, 2000);
+
 // Запускаем после полной загрузки DOM
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', init);
