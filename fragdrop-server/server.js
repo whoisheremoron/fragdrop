@@ -247,12 +247,14 @@ app.post('/api/upgrade', requireAuth, (req, res) => {
   const { srcUid, srcSkinId, dstSkinId } = req.body;
   if (!srcUid || !srcSkinId || !dstSkinId) return res.status(400).json({ error: 'Неверные параметры' });
 
-  const inventory = DB.getInventory(sid).map(r => ({ uid: r.uid, skinId: r.skin_id }));
-  const result    = resolveUpgrade(srcSkinId, srcUid, dstSkinId, inventory);
+  const srcSkinIdNum = Number(srcSkinId);
+  const dstSkinIdNum = Number(dstSkinId);
+  const inventory = DB.getInventory(sid).map(r => ({ uid: r.uid, skinId: Number(r.skin_id) }));
+  const result    = resolveUpgrade(srcSkinIdNum, srcUid, dstSkinIdNum, inventory);
   if (result.error) return res.status(400).json({ error: result.error });
 
-  const srcSkin = SKIN_MAP.get(srcSkinId);
-  const dstSkin = SKIN_MAP.get(dstSkinId);
+  const srcSkin = SKIN_MAP.get(srcSkinIdNum);
+  const dstSkin = SKIN_MAP.get(dstSkinIdNum);
 
   DB.db.transaction(() => {
     DB.removeItem(sid, result.removedUid);
