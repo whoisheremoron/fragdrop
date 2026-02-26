@@ -21,14 +21,14 @@ const PORT = process.env.PORT || 3000;
 // ════════════════════════════════════════════════════════
 const CONFIG = {
   // 1. Получи ключ на https://steamcommunity.com/dev/apikey
-  STEAM_API_KEY: '2CDC10E59C2632A1B7A04789F6C4D0F9',
+  STEAM_API_KEY: 'ВСТАВЬ_STEAM_API_KEY_СЮДА',
 
   // 2. Полный URL твоего сайта (без слеша в конце)
   //    Пример: 'http://1.2.3.4:3000' или 'https://fragdrop.ru'
-  SITE_URL: 'http://195.226.95.12:3000',
+  SITE_URL: 'http://ВСТАВЬ_IP_ИЛИ_ДОМЕН:3000',
 
   // 3. Случайная строка для подписи сессий (измени на любую длинную строку)
-  SESSION_SECRET: 'ludoebkadodepnakbsrochnocsrestoredkrutopidorsepicnigga67yebal$84@blyanahuyapisateto!menyazovutniggamne38!53^%)_33oP',
+  SESSION_SECRET: 'замени-на-случайную-строку-минимум-32-символа',
 };
 // ════════════════════════════════════════════════════════
 
@@ -85,29 +85,44 @@ app.get('/auth/steam', passport.authenticate('steam', { failureRedirect: '/' }))
 
 // Шаг 2: Steam возвращает сюда
 app.get('/auth/steam/return',
-  passport.authenticate('steam', { failureRedirect: '/?auth=fail' }),
-  (req, res) => {
-    const steamUser = req.user;
-    if (!steamUser) return res.redirect('/?auth=fail');
+  (req, res, next) => {
+    passport.authenticate('steam', { failureRedirect: '/?auth=fail' }, (err, user, info) => {
+      if (err) {
+        console.error('[STEAM AUTH ERROR]', err);
+        return res.redirect('/?auth=fail');
+      }
+      if (!user) {
+        console.warn('[STEAM AUTH] No user returned, info:', info);
+        return res.redirect('/?auth=fail');
+      }
 
-    // Получаем или создаём игрока по steam_id
-    // Если такой steam_id уже есть — берём его session_id
-    // Если нет — привязываем к текущей сессии
-    let sid = req.session.fragdropSid;
-    if (!sid) { sid = uuidv4(); req.session.fragdropSid = sid; }
+      req.logIn(user, (loginErr) => {
+        if (loginErr) {
+          console.error('[STEAM LOGIN ERROR]', loginErr);
+          return res.redirect('/?auth=fail');
+        }
 
-    // Проверяем — есть ли уже аккаунт с этим steamId
-    const existing = DB.stmts.getPlayerBySteam.get(steamUser.steamId);
-    if (existing) {
-      // Используем существующий аккаунт
-      req.session.fragdropSid = existing.session_id;
-    } else {
-      // Создаём новый и привязываем Steam
-      DB.getOrCreate(sid);
-      DB.stmts.updateSteam.run(steamUser.steamId, steamUser.nick, steamUser.avatar, sid);
-    }
+        try {
+          const steamUser = user;
+          let sid = req.session.fragdropSid;
+          if (!sid) { sid = uuidv4(); req.session.fragdropSid = sid; }
 
-    res.redirect('/');
+          const existing = DB.stmts.getPlayerBySteam.get(steamUser.steamId);
+          if (existing) {
+            req.session.fragdropSid = existing.session_id;
+          } else {
+            DB.getOrCreate(sid);
+            DB.stmts.updateSteam.run(steamUser.steamId, steamUser.nick, steamUser.avatar, sid);
+          }
+
+          console.log('[STEAM AUTH OK] steamId:', steamUser.steamId, 'nick:', steamUser.nick);
+          res.redirect('/');
+        } catch (dbErr) {
+          console.error('[STEAM DB ERROR]', dbErr);
+          res.redirect('/?auth=fail');
+        }
+      });
+    })(req, res, next);
   }
 );
 
@@ -351,4 +366,21 @@ app.listen(PORT, () => {
   if (CONFIG.STEAM_API_KEY === 'ВСТАВЬ_STEAM_API_KEY_СЮДА') {
     console.warn('⚠️  Steam API key не настроен! Отредактируй CONFIG в server.js');
   }
+});
+
+// ── Глобальные обработчики ошибок ─────────────────────
+// Ловит синхронные ошибки в роутах
+app.use((err, req, res, next) => {
+  console.error('[EXPRESS ERROR]', err.stack || err);
+  if (!res.headersSent) res.status(500).json({ error: 'Internal server error' });
+});
+
+// Ловит необработанные Promise rejection (async краши)
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[UNHANDLED REJECTION]', reason);
+});
+
+// Ловит синхронные необработанные исключения
+process.on('uncaughtException', (err) => {
+  console.error('[UNCAUGHT EXCEPTION]', err.stack || err);
 });
