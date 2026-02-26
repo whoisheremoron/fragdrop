@@ -1,0 +1,17 @@
+{
+  "name": "fragdrop-server",
+  "version": "1.0.0",
+  "description": "FragDrop CS2 case simulator — backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.18.3",
+    "express-rate-limit": "^7.2.0",
+    "uuid": "^9.0.1"
+  }
+}
