@@ -95,11 +95,6 @@ const stmts = {
 // Создать/обновить игрока при логине через Steam
 function upsertPlayer(steamId, nick, avatar) {
   stmts.upsertPlayer.run(steamId, nick, avatar || null);
-  // Стартовый баланс 1000 только при первом создании
-  const p = stmts.getPlayer.get(steamId);
-  if (p.balance === 0 && p.cases_opened === 0) {
-    stmts.updateBalance.run(1000, steamId);
-  }
   return stmts.getPlayer.get(steamId);
 }
 

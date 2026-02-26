@@ -1686,7 +1686,14 @@ function nav(pg){
 // ═══════════════════════════════════════════════════════
 function openDep(){ document.getElementById('dep-ov').classList.add('open'); }
 function closeDep(){ document.getElementById('dep-ov').classList.remove('open'); }
-function addBal(a){ balance+=a; totalDeposited+=a; updBal(); toast(`+${fmt(a)} зачислено`,'s'); }
+async function addBal(a){
+  try {
+    const r=await fetch('/api/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a})});
+    const d=await r.json();
+    if(!r.ok){toast(d.error||'Ошибка пополнения','e');return;}
+    balance=d.balance; updBal(); toast(`+${fmt(a)} зачислено`,'s'); closeDep();
+  } catch(e){toast('Ошибка сети','e');}
+}
 function addCustomBal(){
   const v=parseFloat(document.getElementById('depCustom').value);
   if(!v||v<=0){toast('Введите сумму','e');return;}
@@ -1763,94 +1770,90 @@ function openCaseAgain(){
 // ═══════════════════════════════════════════════════════
 //  МУЛЬТИ-ОТКРЫТИЕ КЕЙСОВ (3, 5, 10 за раз)
 // ═══════════════════════════════════════════════════════
-function openMultiple(count) {
-  if(!curCase) return;
-  const price = curCase.price;
-  const total = price * count;
-  if(price > 0 && balance < total) {
-    toast(`Недостаточно средств! Нужно ${fmt(total)}`, 'e');
-    openDep();
-    return;
-  }
-  if(price === 0 && freeDone) { toast('Бесплатный кейс — раз в сессию!', 'e'); return; }
+async function openMultiple(count) {
+  if(!curCase)return;
+  const price=curCase.price;
+  const total=price*count;
+  if(price>0&&balance<total){toast(`Недостаточно средств! Нужно ${fmt(total)}`,'e');openDep();return;}
+  if(price===0&&freeDone){toast('Бесплатный кейс — раз в сессию!','e');return;}
 
-  // Скрыть рил и кнопки открытия
-  document.getElementById('reel-wrap').style.display = 'none';
-  document.getElementById('spin-btn').style.display = 'none';
-  document.getElementById('multi-btns').style.display = 'none';
+  document.getElementById('reel-wrap').style.display='none';
+  document.getElementById('spin-btn').style.display='none';
+  document.getElementById('multi-btns').style.display='none';
   document.getElementById('spin-res').classList.remove('show');
 
-  const rawPool = curCase.items.map(skin).filter(Boolean);
-  const priceLimit = curCase.price > 0 ? curCase.price * 2 : Infinity;
-  const pool = rawPool.filter(s => s.price <= priceLimit).length > 0
-    ? rawPool.filter(s => s.price <= priceLimit)
-    : rawPool;
-  const results = [];
-  for(let i = 0; i < count; i++) {
-    if(price > 0) { balance -= price; stats.spent += price; }
-    if(price === 0) freeDone = true;
-    const r = weightedRoll(pool);
-    const item = {...r, wear: randWear(), uid: uid()};
-    inventory.push(item); _updateInvHash(inventory);
-    stats.earned += item.price;
-    stats.casesOpened++;
-    history.unshift({type:'drop', item:{...item}, from:curCase.name, ts:Date.now()});
-    results.push(item);
+  try {
+    const r=await fetch('/api/spin/multi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caseId:curCase.id,count})});
+    const d=await r.json();
+    if(!r.ok){toast(d.error||'Ошибка','e');return;}
+
+    balance=d.balance; updBal();
+    const results=d.items;
+    results.forEach(item=>{
+      inventory.push(item);
+      stats.casesOpened++;
+      stats.earned+=item.price;
+      stats.spent+=price;
+      history.unshift({type:'drop',item:{...item},from:curCase.name,ts:Date.now()});
+    });
+
+    const resBox=document.getElementById('spin-res');
+    resBox.innerHTML=`
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text2);margin-bottom:12px">
+        ОТКРЫТО × ${count} — итого потрачено ${fmt(total)}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px">
+        ${results.map(s=>{
+          const fb=skinSVG(s).replace(/'/g,"\'");
+          return `<div style="background:var(--bg3);border:1px solid ${RC[s.rarity]}44;border-radius:10px;padding:10px;text-align:center;cursor:pointer" onclick="quickSell('${s.uid}',this)">
+            <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy" onerror="this.onerror=null;this.src='${fb}'" style="width:90px;height:66px;object-fit:contain;display:block;margin:0 auto 6px;filter:drop-shadow(0 3px 8px ${RC[s.rarity]}66)">
+            <div style="color:${RC[s.rarity]};font-size:12px;font-weight:700;font-family:'Barlow Condensed',sans-serif;line-height:1.2;margin-bottom:3px">${s.name.split('|')[1]?.trim()||s.name}</div>
+            <div style="color:var(--text2);font-size:11px">${s.wear}</div>
+            <div style="color:${RC[s.rarity]};font-size:13px;font-weight:800;margin-top:3px">${fmt(s.price)}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px">нажмите чтобы продать</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-sell" onclick="sellAllMulti()">Продать всё</button>
+        <button class="btn" onclick="openCaseAgain()">🔄 Открыть ещё</button>
+        <button class="btn" onclick="closeCase()">Забрать всё</button>
+      </div>
+    `;
+    resBox.classList.add('show');
+    resBox.dataset.multiUids=results.map(r=>r.uid).join(',');
+  } catch(e){toast('Ошибка сети','e');}
+}
+async function quickSell(uid, el) {
+  el.style.opacity='0.5'; el.style.pointerEvents='none';
+  try {
+    const r=await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:uid})});
+    const d=await r.json();
+    if(!r.ok){toast(d.error||'Ошибка продажи','e');el.style.opacity='1';el.style.pointerEvents='';return;}
+    const idx=inventory.findIndex(i=>i.uid===uid);
+    if(idx>-1){const item=inventory[idx];stats.earned+=item.price;inventory.splice(idx,1);}
+    balance=d.balance; updBal();
+    el.style.opacity='0.3';
+    el.querySelector('div:last-child').textContent='✓ Продано';
+    toast(`Продано — ${fmt(d.sold)}`,'s');
+  } catch(e){toast('Ошибка сети','e');el.style.opacity='1';el.style.pointerEvents='';}
+}
+async function sellAllMulti() {
+  const uids=(document.getElementById('spin-res').dataset.multiUids||'').split(',').filter(Boolean);
+  let total=0,sold=0;
+  for(const uid of uids){
+    try{
+      const r=await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:uid})});
+      const d=await r.json();
+      if(r.ok){
+        const idx=inventory.findIndex(i=>i.uid===uid);
+        if(idx>-1){total+=inventory[idx].price;inventory.splice(idx,1);}
+        balance=d.balance; sold++;
+      }
+    }catch(e){}
   }
   updBal();
-
-  // Show results grid
-  const resBox = document.getElementById('spin-res');
-  resBox.innerHTML = `
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text2);margin-bottom:12px">
-      ОТКРЫТО × ${count} — итого потрачено ${fmt(total)}
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px">
-      ${results.map(s => {
-        const fb = skinSVG(s).replace(/'/g, "\'");
-        return `<div style="background:var(--bg3);border:1px solid ${RC[s.rarity]}44;border-radius:10px;padding:10px;text-align:center;cursor:pointer" onclick="quickSell('${s.uid}', this)">
-          <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy"
-            onerror="this.onerror=null;this.src='${fb}'"
-            style="width:90px;height:66px;object-fit:contain;display:block;margin:0 auto 6px;filter:drop-shadow(0 3px 8px ${RC[s.rarity]}66)">
-          <div style="color:${RC[s.rarity]};font-size:12px;font-weight:700;font-family:'Barlow Condensed',sans-serif;line-height:1.2;margin-bottom:3px">${s.name.split('|')[1]?.trim()||s.name}</div>
-          <div style="color:var(--text2);font-size:11px">${s.wear}</div>
-          <div style="color:${RC[s.rarity]};font-size:13px;font-weight:800;margin-top:3px">${fmt(s.price)}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:4px">нажмите чтобы продать</div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn btn-sell" onclick="sellAllMulti()">Продать всё</button>
-      <button class="btn" onclick="openCaseAgain()">🔄 Открыть ещё</button>
-      <button class="btn" onclick="closeCase()">Забрать всё</button>
-    </div>
-  `;
-  resBox.classList.add('show');
-  resBox.dataset.multiUids = results.map(r=>r.uid).join(',');
-}
-
-function quickSell(uid, el) {
-  const idx = inventory.findIndex(i => i.uid === uid);
-  if(idx === -1) { el.style.opacity = '0.3'; el.style.pointerEvents = 'none'; return; }
-  const item = inventory[idx];
-  balance += item.price;
-  stats.earned += item.price;
-  inventory.splice(idx, 1);
-  updBal();
-  el.style.opacity = '0.3';
-  el.style.pointerEvents = 'none';
-  el.querySelector('div:last-child').textContent = '✓ Продано';
-  toast(`Продано: ${item.name} — ${fmt(item.price)}`, 's');
-}
-
-function sellAllMulti() {
-  const uids = (document.getElementById('spin-res').dataset.multiUids || '').split(',').filter(Boolean);
-  let total = 0, sold = 0;
-  uids.forEach(uid => {
-    const idx = inventory.findIndex(i => i.uid === uid);
-    if(idx > -1) { total += inventory[idx].price; inventory.splice(idx,1); sold++; }
-  });
-  if(sold > 0) { balance += total; updBal(); toast(`Продано ${sold} предметов — ${fmt(total)}`, 's'); }
+  if(sold>0)toast(`Продано ${sold} предметов — ${fmt(total)}`,'s');
   openCaseAgain();
 }
 function imgTag(s, cls='') {
@@ -1896,84 +1899,67 @@ function buildReel(){
   track.innerHTML=html;
 }
 
-function spinCase(){
+async function spinCase(){
   if(!curCase)return;
   if(curCase.price>0&&balance<curCase.price){toast('Недостаточно средств!','e');openDep();return;}
   if(curCase.price===0&&freeDone){toast('Бесплатный кейс — раз в сессию!','e');return;}
-  if(curCase.price>0){balance-=curCase.price;stats.spent+=curCase.price;}
-  if(curCase.price===0)freeDone=true;
-  updBal();
-
-  const rawPool=curCase.items.map(skin).filter(Boolean);
-  // Скрытый лимит: предметы дороже 2× цены кейса не выпадают
-  const priceLimit = curCase.price > 0 ? curCase.price * 2 : Infinity;
-  const pool = rawPool.filter(s => s.price <= priceLimit).length > 0
-    ? rawPool.filter(s => s.price <= priceLimit)
-    : rawPool;
-  const result=weightedRoll(pool);
-  curResult={...result, wear:randWear(), uid:uid()};
-
-  const track=document.getElementById('reel-track');
-  const items=track.querySelectorAll('.reel-item');
-
-  // We want the result item to be at a fixed index
-  const TARGET_IDX = 62; // item that will be at center after spin
-
-  // Inject result into that slot
-  if(items[TARGET_IDX]){
-    const fb=skinSVG(result).replace(/'/g,"\\'");
-    items[TARGET_IDX].className=`reel-item r-${result.rarity}`;
-    items[TARGET_IDX].innerHTML=`<img src="${getSkinImg(result)}" alt="${result.name}" loading="lazy"
-      onerror="this.onerror=null;this.src='${fb}'"
-      style="width:86px;height:64px;object-fit:contain;">
-      <div class="reel-item-name">${result.name}</div>`;
-    items[TARGET_IDX].setAttribute('data-id', result.id);
-  }
-
-  // Read actual rendered dimensions (respects CSS/mobile breakpoints)
-  const trackWrap = track.parentElement;
-  const vpCenter = trackWrap.clientWidth / 2;
-
-  // Use getBoundingClientRect on first item to get real width
-  const firstItem = items[0];
-  const realItemW = firstItem ? firstItem.getBoundingClientRect().width : REEL_ITEM_W;
-  // Get gap from computed style of track
-  const computedGap = parseFloat(getComputedStyle(track).gap) || REEL_GAP;
-  const realStride = realItemW + computedGap;
-  // Track has padding-left=6px
-  const realPad = parseFloat(getComputedStyle(track).paddingLeft) || REEL_PAD;
-
-  // Center of the target item in track coordinates
-  const itemCenter = realPad + TARGET_IDX * realStride + realItemW / 2;
-
-  // Offset: how much to shift track so itemCenter aligns with vpCenter
-  const jitter = (Math.random() - 0.5) * (realItemW * 0.5); // ±half item width
-  const finalX = -(itemCenter - vpCenter) + jitter;
 
   document.getElementById('spin-btn').disabled=true;
 
-  // Tiny delay ensures the DOM paint happened with transition='none'
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      track.style.transition='transform 6.2s cubic-bezier(.03,.96,.06,1)';
-      track.style.transform=`translateX(${finalX}px)`;
-    });
-  });
+  try {
+    const r=await fetch('/api/spin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caseId:curCase.id})});
+    const d=await r.json();
+    if(!r.ok){toast(d.error||'Ошибка','e');document.getElementById('spin-btn').disabled=false;return;}
 
-  stats.casesOpened++;
-
-  window._spinTimer = setTimeout(()=>{
-    window._spinTimer = null;
-    if(!curCase) return; // кейс закрыт до окончания анимации
-    showResult(curResult);
-    inventory.push(curResult); _updateInvHash(inventory);
+    balance=d.balance; updBal();
+    if(curCase.price===0) freeDone=true;
+    curResult={...d.item};
+    inventory.push(curResult);
+    stats.casesOpened++;
+    stats.earned+=curResult.price;
+    stats.spent+=(curCase.price||0);
     history.unshift({type:'drop',item:curResult,from:curCase.name,ts:Date.now()});
-    stats.earned += curResult.price;
-    document.getElementById('spin-btn').style.display='none';
-    document.getElementById('reel-wrap').style.display='none';
-    const mb=document.getElementById('multi-btns');
-    if(mb) mb.style.display='none';
-  }, 6800);
+
+    const track=document.getElementById('reel-track');
+    const items=track.querySelectorAll('.reel-item');
+    const TARGET_IDX=62;
+    if(items[TARGET_IDX]){
+      const fb=skinSVG(curResult).replace(/'/g,"\\'");
+      items[TARGET_IDX].className=`reel-item r-${curResult.rarity}`;
+      items[TARGET_IDX].innerHTML=`<img src="${getSkinImg(curResult)}" alt="${curResult.name}" loading="lazy"
+        onerror="this.onerror=null;this.src='${fb}'"
+        style="width:86px;height:64px;object-fit:contain;">
+        <div class="reel-item-name">${curResult.name}</div>`;
+      items[TARGET_IDX].setAttribute('data-id',curResult.id);
+    }
+    const trackWrap=track.parentElement;
+    const vpCenter=trackWrap.clientWidth/2;
+    const firstItem=items[0];
+    const realItemW=firstItem?firstItem.getBoundingClientRect().width:REEL_ITEM_W;
+    const computedGap=parseFloat(getComputedStyle(track).gap)||REEL_GAP;
+    const realStride=realItemW+computedGap;
+    const realPad=parseFloat(getComputedStyle(track).paddingLeft)||REEL_PAD;
+    const itemCenter=realPad+TARGET_IDX*realStride+realItemW/2;
+    const jitter=(Math.random()-0.5)*(realItemW*0.5);
+    const finalX=-(itemCenter-vpCenter)+jitter;
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        track.style.transition='transform 6.2s cubic-bezier(.03,.96,.06,1)';
+        track.style.transform=`translateX(${finalX}px)`;
+      });
+    });
+
+    window._spinTimer=setTimeout(()=>{
+      window._spinTimer=null;
+      if(!curCase)return;
+      showResult(curResult);
+      document.getElementById('spin-btn').style.display='none';
+      document.getElementById('reel-wrap').style.display='none';
+      const mb=document.getElementById('multi-btns');
+      if(mb)mb.style.display='none';
+    },6800);
+  } catch(e){toast('Ошибка сети','e');document.getElementById('spin-btn').disabled=false;}
 }
 function showResult(item){
   const glow=RC[item.rarity]+'66';
@@ -1989,14 +1975,19 @@ function showResult(item){
   document.getElementById('spin-res').classList.add('show');
   toast(`${item.name} — ${fmt(item.price)}`, item.rarity==='knife'||item.rarity==='covert'?'s':'i');
 }
-function sellResult(){
+async function sellResult(){
   if(!curResult)return;
-  const idx=inventory.findIndex(i=>i.uid===curResult.uid);
-  if(idx>-1)inventory.splice(idx,1);
-  balance+=curResult.price; stats.earned+=curResult.price; updBal();
-  history.unshift({type:'sell',item:{...curResult},from:'Инвентарь',ts:Date.now()});
-  toast(`Продано за ${fmt(curResult.price)}`,'s');
-  closeCase();
+  try{
+    const r=await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:curResult.uid})});
+    const d=await r.json();
+    if(!r.ok){toast(d.error||'Ошибка','e');return;}
+    const idx=inventory.findIndex(i=>i.uid===curResult.uid);
+    if(idx>-1){stats.earned+=inventory[idx].price;inventory.splice(idx,1);}
+    history.unshift({type:'sell',item:{...curResult},from:'Инвентарь',ts:Date.now()});
+    balance=d.balance; updBal();
+    toast(`Продано за ${fmt(d.sold)}`,'s');
+    closeCase();
+  }catch(e){toast('Ошибка сети','e');}
 }
 function featResult(){
   if(!curResult)return;
@@ -2035,15 +2026,21 @@ function renderInv(){
       </div>
     </div>`}).join('');
 }
-function sellInvItem(uid){
+async function sellInvItem(uid){
   const idx=inventory.findIndex(i=>String(i.uid)===String(uid));
   if(idx<0)return;
   const item=inventory[idx];
-  inventory.splice(idx,1);
-  balance+=item.price; stats.earned+=item.price; updBal();
-  history.unshift({type:'sell',item:{...item},from:'Инвентарь',ts:Date.now()});
-  toast(`Продано: ${item.name} — ${fmt(item.price)}`,'s');
-  renderInv();
+  try{
+    const r=await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:uid})});
+    const d=await r.json();
+    if(!r.ok){toast(d.error||'Ошибка','e');return;}
+    inventory.splice(idx,1);
+    stats.earned+=item.price;
+    history.unshift({type:'sell',item:{...item},from:'Инвентарь',ts:Date.now()});
+    balance=d.balance; updBal();
+    toast(`Продано: ${item.name} — ${fmt(d.sold)}`,'s');
+    renderInv();
+  }catch(e){toast('Ошибка сети','e');}
 }
 function toggleFeat(uid){
   const item=inventory.find(i=>String(i.uid)===String(uid));
@@ -2390,60 +2387,64 @@ function calcUpg(){
   btn.disabled=false;
 }
 
-function doUpgrade(){
+async function doUpgrade(){
   if(!upgSrc||!upgDst)return;
-  const chance = upgradeChanceWithDrain(upgSrc.price, upgDst.price);
-
-  const srcSnap = {...upgSrc};
-  const dstSnap = {...upgDst};
-
-  const idx=inventory.findIndex(i=>i===upgSrc||(i.uid&&i.uid===upgSrc.uid));
-  if(idx>-1) inventory.splice(idx,1);
-  stats.spent += upgSrc.price;
+  const srcSnap={...upgSrc};
+  const dstSnap={...upgDst};
+  const srcUid=upgSrc.uid;
+  const chance=upgradeChanceWithDrain(upgSrc.price,upgDst.price);
 
   document.getElementById('upg-btn').disabled=true;
-
-  // Decide outcome
-  // Скрытый незаход: если скин дороже порога - всегда проигрыш, без видимых подсказок
-  const guaranteedLoss = dstSnap.price > UPGRADE_GUARANTEED_LOSS_THRESHOLD;
-  const won = guaranteedLoss ? false : (Math.random()*100 < chance);
-
-  // Win zone: from -90° (top) clockwise for winDeg degrees
-  // Canvas: angle 0 = right (3 o'clock), -90 = top (12 o'clock)
-  const winDeg = (chance / 100) * 360;
-
-  let targetDeg; // final resting angle of needle (canvas degrees)
-  if (won) {
-    // Land inside win zone [-90 .. -90+winDeg] with small margin
-    const margin = Math.max(3, winDeg * 0.06);
-    const range  = Math.max(1, winDeg - margin * 2);
-    targetDeg = -90 + margin + Math.random() * range;
-  } else {
-    // Land inside lose zone [-90+winDeg .. -90+360] with small margin
-    const loseDeg = 360 - winDeg;
-    const margin  = Math.max(3, loseDeg * 0.06);
-    const range   = Math.max(1, loseDeg - margin * 2);
-    targetDeg = (-90 + winDeg) + margin + Math.random() * range;
-  }
-
-  const duration = 3500 + Math.random() * 1500;
-  animateNeedle(targetDeg, duration, () => {
-    setTimeout(() => showUpgradeResult(won, srcSnap, dstSnap), 450);
-  });
-
   upgSrc=null; upgDst=null;
   resetUpgSlotsOnly();
-}
 
-function showUpgradeResult(won, src, dst) {
+  try{
+    const r=await fetch('/api/upgrade',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({srcUid,srcSkinId:srcSnap.id,dstSkinId:dstSnap.id})});
+    const d=await r.json();
+    if(!r.ok){toast(d.error||'Ошибка апгрейда','e');document.getElementById('upg-btn').disabled=false;return;}
+
+    balance=d.balance; updBal();
+    const idx=inventory.findIndex(i=>i.uid===srcUid);
+    if(idx>-1){stats.spent+=srcSnap.price;inventory.splice(idx,1);}
+
+    const winDeg=(chance/100)*360;
+    let targetDeg;
+    if(d.won){
+      const margin=Math.max(3,winDeg*0.06);
+      const range=Math.max(1,winDeg-margin*2);
+      targetDeg=-90+margin+Math.random()*range;
+    } else {
+      const loseDeg=360-winDeg;
+      const margin=Math.max(3,loseDeg*0.06);
+      const range=Math.max(1,loseDeg-margin*2);
+      targetDeg=(-90+winDeg)+margin+Math.random()*range;
+    }
+
+    const duration=3500+Math.random()*1500;
+    animateNeedle(targetDeg,duration,()=>{
+      setTimeout(()=>{
+        if(d.won){
+          stats.upgradeWin++;
+          const newItem={...d.item};
+          inventory.push(newItem);
+          history.unshift({type:'upgrade',item:{...newItem},from:'Апгрейд',ts:Date.now()});
+          stats.earned+=dstSnap.price;
+        } else {
+          stats.upgradeLoss++;
+          history.unshift({type:'upgrade',item:{...srcSnap},from:'Апгрейд',ts:Date.now()});
+        }
+        showUpgradeResult(d.won,srcSnap,dstSnap,d.item);
+      },450);
+    });
+  }catch(e){toast('Ошибка сети','e');document.getElementById('upg-btn').disabled=false;}
+}
+function showUpgradeResult(won, src, dst, newItemData) {
   const resBox = document.getElementById('upg-res-box');
   const srcFb = skinSVG(src).replace(/'/g,"\\'");
   const dstFb = skinSVG(dst).replace(/'/g,"\\'");
   if(won){
     stats.upgradeWin++;
-    const newItem={...dst, wear:randWear(), uid:uid()};
-    inventory.push(newItem); _updateInvHash(inventory);
-    history.unshift({type:'upgrade',item:{...newItem},from:'Апгрейд',ts:Date.now()});
+    const newItem=newItemData||{...dst, wear:randWear(), uid:uid()};
     const col = RC[dst.rarity];
     resBox.style.setProperty('--res-bar', `linear-gradient(90deg, #27ae60, #2ecc71)`);
     resBox.innerHTML=`
@@ -2571,44 +2572,48 @@ function updCSum(){
   else if(out<total*0.8){oc.className='coutcome n';oc.textContent='📉 Убыточный контракт';}
   else{oc.className='coutcome e';oc.textContent='⚖️ Примерный обмен';}
 }
-function execContract(){
+async function execContract(){
   const filled=cSlots.filter(Boolean);
   if(filled.length<2)return;
+  const uids=filled.map(i=>i.uid);
   const total=filled.reduce((s,i)=>s+i.price,0);
   const title=document.getElementById('ctitle').value||'Безымянный контракт';
-  const note=document.getElementById('cnote').value;
-  filled.forEach(sl=>{const i=inventory.findIndex(x=>x.uid===sl.uid);if(i>-1)inventory.splice(i,1);});
-  stats.spent+=total;
-  const mult=contractMultiplierWithDrain();
-  const target=total*mult;
-  // Контракт никогда не выдаёт скин дороже 2000р
-  const eligible = SKINS.filter(s => s.price <= 2000);
-  const pool = eligible.length > 0 ? eligible : SKINS;
-  const sorted=[...pool].sort((a,b)=>Math.abs(a.price-target)-Math.abs(b.price-target));
-  const result={...sorted[0], wear:randWear(), uid:uid()};
-  inventory.push(result); _updateInvHash(inventory);
-  history.unshift({type:'contract',item:{...result},from:title,ts:Date.now()});
-  stats.contracts++;
-  cSlots=new Array(10).fill(null);
-  document.getElementById('ctitle').value='';
-  document.getElementById('cnote').value='';
-  renderCSlots();
-  const won=result.price>total;
-  stats.earned+=result.price;
-  const resFb=skinSVG(result).replace(/'/g,"\\'");
-  document.getElementById('upg-res-box').innerHTML=`
-    <div style="font-size:13px;color:var(--text2);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;margin-bottom:4px">${title}</div>
-    ${note?`<div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-style:italic">"${note}"</div>`:''}
-    <img src="${getSkinImg(result)}" alt="${result.name}"
-      onerror="this.onerror=null;this.src='${resFb}'"
-      style="width:150px;height:110px;object-fit:contain;display:block;margin:0 auto 8px;filter:drop-shadow(0 6px 22px ${RC[result.rarity]}88)">
-    <div style="color:${RC[result.rarity]};font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;margin-bottom:3px">${result.name}</div>
-    <div class="upg-res-outcome" style="color:${won?'var(--green)':'var(--red)'};">${fmt(result.price)}</div>
-    <div style="color:var(--text2);font-size:12px;margin-top:3px">Вложено: ${fmt(total)} · ${won?'Прибыль +':'Убыток -'}${fmt(Math.abs(result.price-total))}</div>
-    <div style="margin-top:18px"><button class="btn" onclick="closeUpgOv()">Закрыть</button></div>
-  `;
-  document.getElementById('upg-ov').classList.add('show');
-  toast(won?`Контракт выгодный! +${fmtS(result.price-total)}`:`Контракт убыточный...`,won?'s':'e');
+
+  try{
+    const r=await fetch('/api/contract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUids:uids})});
+    const d=await r.json();
+    if(!r.ok){toast(d.error||'Ошибка контракта','e');return;}
+
+    balance=d.balance; updBal();
+    filled.forEach(sl=>{const i=inventory.findIndex(x=>x.uid===sl.uid);if(i>-1)inventory.splice(i,1);});
+    stats.spent+=total;
+    stats.contracts++;
+
+    const result=d.item;
+    inventory.push(result);
+    history.unshift({type:'contract',item:{...result},from:title,ts:Date.now()});
+    stats.earned+=result.price;
+
+    cSlots=new Array(10).fill(null);
+    document.getElementById('ctitle').value='';
+    document.getElementById('cnote').value='';
+    renderCSlots();
+
+    const won=result.price>total;
+    const resFb=skinSVG(result).replace(/'/g,"\'");
+    document.getElementById('upg-res-box').innerHTML=`
+      <div style="font-size:13px;color:var(--text2);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;margin-bottom:4px">${title}</div>
+      <img src="${getSkinImg(result)}" alt="${result.name}"
+        onerror="this.onerror=null;this.src='${resFb}'"
+        style="width:150px;height:110px;object-fit:contain;display:block;margin:0 auto 8px;filter:drop-shadow(0 6px 22px ${RC[result.rarity]}88)">
+      <div style="color:${RC[result.rarity]};font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;margin-bottom:3px">${result.name}</div>
+      <div class="upg-res-outcome" style="color:${won?'var(--green)':'var(--red)'};">${fmt(result.price)}</div>
+      <div style="color:var(--text2);font-size:12px;margin-top:3px">Вложено: ${fmt(total)} · ${won?'Прибыль +':'Убыток -'}${fmt(Math.abs(result.price-total))}</div>
+      <div style="margin-top:18px"><button class="btn" onclick="closeUpgOv()">Закрыть</button></div>
+    `;
+    document.getElementById('upg-ov').classList.add('show');
+    toast(won?`Контракт выгодный! +${fmtS(result.price-total)}`:`Контракт убыточный...`,won?'s':'e');
+  }catch(e){toast('Ошибка сети','e');}
 }
 
 // ═══════════════════════════════════════════════════════
