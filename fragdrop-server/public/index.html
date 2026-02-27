@@ -1750,432 +1750,413 @@ function addCustomBal(){
 // ═══════════════════════════════════════════════════════
 //  CASES RENDER
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  CASES RENDER
+// ═══════════════════════════════════════════════════════
+
 function renderCases(){
-  const cs2Cases = CASES.filter(c=>c.category==='cs2');
-  const fragCases = CASES.filter(c=>c.category==='frag');
-  const freeCases = CASES.filter(c=>c.category==='free');
-  function caseCard(c){
-    const isFree=c.price===0;
-    const secsLeft=isFree&&freeDone?Math.max(0,Math.floor((freeNextTs-Date.now())/1000)):0;
-    const h=Math.floor(secsLeft/3600),m=Math.floor((secsLeft%3600)/60);
-    const subtitle=isFree&&freeDone?`<div style="font-size:10px;color:var(--text3);margin-top:2px">через ${h}ч ${m}м</div>`:'';
+  const cs2  = CASES.filter(c => c.category === 'cs2');
+  const frag = CASES.filter(c => c.category === 'frag');
+  const free = CASES.filter(c => c.category === 'free');
+
+  function card(c){
+    const isFree = c.price === 0;
+    const secsLeft = isFree && freeDone ? Math.max(0, Math.floor((freeNextTs - Date.now()) / 1000)) : 0;
+    const timerHtml = secsLeft > 0
+      ? `<div style="font-size:10px;color:var(--text3);margin-top:2px">через ${Math.floor(secsLeft/3600)}ч ${Math.floor((secsLeft%3600)/60)}м</div>`
+      : '';
+    const priceHtml = isFree
+      ? `<div class="case-price" style="color:var(--green)">БЕСПЛАТНО</div>`
+      : `<div class="case-price" style="color:${c.color}">${fmt(c.price)}</div>`;
+    const badgeHtml = c.badge ? `<div class="case-badge">${c.badge}</div>` : '';
     return `<div class="case-card" onclick="openCase('${c.id}')" style="--cc:${c.color}">
-      ${c.badge?`<div class="case-badge">${c.badge}</div>`:''}
+      ${badgeHtml}
       <div class="case-color-bar" style="background:${c.color}"></div>
-      <div class="case-icon" style="font-size:28px;color:${c.color};text-align:center;padding:10px 0 2px;">${isFree?'🎁':c.badge==='АВТОРСКИЙ'?'⭐':'📦'}</div>
+      <div style="font-size:32px;text-align:center;padding:12px 0 4px">${isFree ? '🎁' : c.badge === 'АВТОРСКИЙ' ? '⭐' : '📦'}</div>
       <div class="case-name">${c.name}</div>
-      <div class="case-price" style="color:${isFree?'var(--green)':c.color}">${isFree?'БЕСПЛАТНО':c.price+'₽'}</div>
-      ${subtitle}
+      ${priceHtml}${timerHtml}
     </div>`;
   }
-  document.getElementById('cases-grid').innerHTML=
-    '<div class="cases-category-title">Кейсы CS2</div>' +
-    '<div class="cases-row">' + cs2Cases.map(caseCard).join('') + '</div>' +
-    '<div class="cases-category-title">Авторские кейсы FragDrop</div>' +
-    '<div class="cases-row">' + fragCases.map(caseCard).join('') + '</div>' +
-    '<div class="cases-category-title">Бесплатно</div>' +
-    '<div class="cases-row">' + freeCases.map(caseCard).join('') + '</div>';
+
+  document.getElementById('cases-grid').innerHTML =
+    '<div class="cases-category-title">Кейсы CS2</div>'           + '<div class="cases-row">' + cs2.map(card).join('') + '</div>' +
+    '<div class="cases-category-title">Авторские кейсы FragDrop</div>' + '<div class="cases-row">' + frag.map(card).join('') + '</div>' +
+    '<div class="cases-category-title">Бесплатно</div>'           + '<div class="cases-row">' + free.map(card).join('') + '</div>';
 }
+
+// ═══════════════════════════════════════════════════════
+//  CASE MODAL — открытие, анимация, результат
+// ═══════════════════════════════════════════════════════
 
 function openCase(cid){
-  if(window._spinTimer){ clearTimeout(window._spinTimer); window._spinTimer=null; }
-  curCase=CASES.find(c=>c.id===cid);
-  document.getElementById('cm-title').textContent=curCase.name;
-  // Восстанавливаем оригинальный DOM spin-res (мог быть заменён openMultiple)
-  const sr = document.getElementById('spin-res');
-  sr.innerHTML = SPIN_RES_HTML;
-  sr.classList.remove('show');
-  buildReel();
-  document.getElementById('reel-wrap').style.display='block';
-  const sb=document.getElementById('spin-btn');
-  sb.style.display='flex'; sb.disabled=false;
-  sb.textContent=curCase.price===0?'Открыть бесплатно':`Открыть за ${fmt(curCase.price)}`;
-  const mb=document.getElementById('multi-btns');
-  if(mb) mb.style.display=curCase.price===0?'none':'flex';
-  renderCaseContents();
+  if(window._spinTimer){ clearTimeout(window._spinTimer); window._spinTimer = null; }
+  curCase = CASES.find(c => c.id === cid);
+  if(!curCase) return;
+
+  // Сброс состояния модала
+  _caseReset();
+
+  // Заголовок и кнопка
+  document.getElementById('cm-title').textContent = curCase.name;
+  const sb = document.getElementById('spin-btn');
+  sb.textContent = curCase.price === 0 ? 'Открыть бесплатно' : `Открыть за ${fmt(curCase.price)}`;
+  sb.disabled = false;
+
+  // Мульти-кнопки только для платных
+  document.getElementById('multi-btns').style.display    = curCase.price === 0 ? 'none' : 'flex';
+  document.getElementById('spin-btns-row').style.display = 'flex';
+
+  _buildReel();
+  _renderContents();
+
   document.getElementById('case-ov').classList.add('open');
 }
+
 function closeCase(){
-  if(window._spinTimer){ clearTimeout(window._spinTimer); window._spinTimer=null; }
+  if(window._spinTimer){ clearTimeout(window._spinTimer); window._spinTimer = null; }
   document.getElementById('case-ov').classList.remove('open');
-  curCase=null; curResult=null;
+  curCase = null; curResult = null;
 }
+
 function openCaseAgain(){
-  if(!curCase)return;
-  document.getElementById('spin-res').classList.remove('show');
-  document.getElementById('reel-wrap').style.display='block';
-  document.getElementById('spin-btn').style.display='flex';
-  document.getElementById('spin-btn').disabled=false;
-  const fsb=document.getElementById('fast-spin-btn');
-  if(fsb){fsb.style.display='flex';fsb.disabled=false;}
-  document.getElementById('spin-btns-row').style.display='flex';
-  const mb2=document.getElementById('multi-btns');
-  if(mb2) mb2.style.display=curCase&&curCase.price===0?'none':'flex';
-  buildReel();
+  if(!curCase) return;
+  _caseReset();
+  const sb = document.getElementById('spin-btn');
+  sb.textContent = curCase.price === 0 ? 'Открыть бесплатно' : `Открыть за ${fmt(curCase.price)}`;
+  sb.disabled = false;
+  document.getElementById('multi-btns').style.display    = curCase.price === 0 ? 'none' : 'flex';
+  document.getElementById('spin-btns-row').style.display = 'flex';
+  _buildReel();
 }
 
-// ═══════════════════════════════════════════════════════
-//  МУЛЬТИ-ОТКРЫТИЕ КЕЙСОВ (3, 5, 10 за раз)
-// ═══════════════════════════════════════════════════════
-// ── Мульти-открытие со слот-машиной ─────────────────────────────────────
-async function openMultiple(count) {
-  if(!curCase)return;
-  const price=curCase.price;
-  const total=price*count;
-  if(price>0&&balance<total){toast(`Недостаточно средств! Нужно ${fmt(total)}`,'e');openDep();return;}
-
-  // Скрываем UI кейса
-  document.getElementById('reel-wrap').style.display='none';
-  document.getElementById('spin-btns-row').style.display='none';
-  document.getElementById('multi-btns').style.display='none';
+// Сбрасывает видимость элементов модала в исходное состояние
+function _caseReset(){
+  document.getElementById('reel-wrap').style.display  = 'block';
   document.getElementById('spin-res').classList.remove('show');
-
-  try {
-    const r=await fetch('/api/spin/multi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caseId:curCase.id,count})});
-    const d=await r.json();
-    if(!r.ok){toast(d.error||'Ошибка','e');return;}
-
-    balance=d.balance; updBal();
-    const results=d.items.map(normalizeItem);
-    results.forEach(item=>{
-      inventory.push(item);
-      stats.casesOpened++;
-      stats.earned+=item.price;
-      stats.spent+=price;
-      history.unshift({type:'drop',item:{...item},from:curCase.name,ts:Date.now()});
-    });
-
-    // Показываем слот-машину
-    showSlotMachine(results, total, count, curCase.name);
-  } catch(e){toast('Ошибка сети','e');}
+  document.getElementById('spin-res').style.display   = '';
+  document.getElementById('reel-track').style.transition = 'none';
+  document.getElementById('reel-track').style.transform  = 'translateX(0)';
+  void document.getElementById('reel-track').offsetWidth; // reflow
+  const fsb = document.getElementById('fast-spin-btn');
+  if(fsb){ fsb.disabled = false; fsb.style.display = 'flex'; }
 }
 
-function showSlotMachine(results, totalCost, count, caseName) {
-  // Закрываем старый слот если был
-  const oldSlot = document.getElementById('slot-modal');
-  if(oldSlot) oldSlot.remove();
+// Строит ленту рулетки из предметов кейса
+function _buildReel(){
+  const track = document.getElementById('reel-track');
+  track.style.transition = 'none';
+  track.style.transform  = 'translateX(0)';
+  void track.offsetWidth;
+  const pool = curCase.items.map(id => SKIN_MAP.get(id)).filter(Boolean);
+  if(!pool.length) return;
+  let html = '';
+  for(let i = 0; i < 80; i++){
+    const s = pool[Math.floor(Math.random() * pool.length)];
+    html += _reelCell(s);
+  }
+  track.innerHTML = html;
+}
+
+function _reelCell(s){
+  const fb = skinSVG(s).replace(/`/g,"'").replace(/"/g,"'");
+  return `<div class="reel-item r-${s.rarity}" data-id="${s.id}">
+    <img src="${getSkinImg(s)}" alt="" loading="lazy"
+      onerror="this.onerror=null;this.src='${fb}'"
+      style="width:86px;height:64px;object-fit:contain;">
+    <div class="reel-item-name">${s.name.split('|')[1]?.trim() || s.name}</div>
+  </div>`;
+}
+
+// Отрисовывает содержимое кейса
+function _renderContents(){
+  const RC_LABEL = {knife:'Нож',contraband:'Контрабанда',covert:'Тайное',classified:'Засекреченное',restricted:'Запрещённое',mil:'Промышленное',consumer:'Ширпотреб'};
+  const grid = document.getElementById('case-contents');
+  const skins = curCase.items.map(id => SKIN_MAP.get(id)).filter(Boolean);
+  const byRarity = {};
+  skins.forEach(s => { (byRarity[s.rarity] = byRarity[s.rarity]||[]).push(s); });
+  const order = ['knife','contraband','covert','classified','restricted','mil','consumer'];
+  let html = '';
+  for(const r of order){
+    if(!byRarity[r]) continue;
+    html += `<div class="cont-rarity-label" style="color:${RC[r]}">${RC_LABEL[r]||r}</div>`;
+    html += byRarity[r].map(s => `
+      <div class="cont-item r-${s.rarity}">
+        <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy"
+          onerror="this.onerror=null;this.src='${skinSVG(s).replace(/"/g,"'")}'">
+        <div class="cont-name">${s.name}</div>
+        <div class="cont-price" style="color:${RC[s.rarity]}">${fmt(s.price)}</div>
+      </div>`).join('');
+  }
+  grid.innerHTML = html;
+}
+
+// ── SPIN — с анимацией рулетки ────────────────────────────────────────────
+async function spinCase(){
+  if(!curCase) return;
+
+  if(curCase.price > 0 && balance < curCase.price){
+    toast('Недостаточно средств!','e'); openDep(); return;
+  }
+  if(curCase.price === 0 && freeDone){
+    const s = Math.max(0, Math.floor((freeNextTs - Date.now()) / 1000));
+    toast(`Следующий бесплатный кейс через ${Math.floor(s/3600)}ч ${Math.floor((s%3600)/60)}м`,'e');
+    return;
+  }
+
+  const sb  = document.getElementById('spin-btn');
+  const fsb = document.getElementById('fast-spin-btn');
+  sb.disabled = true; if(fsb) fsb.disabled = true;
+
+  let d;
+  try{
+    const r = await fetch('/api/spin',{method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({caseId: curCase.id})});
+    d = await r.json();
+    if(!r.ok){ toast(d.error||'Ошибка','e'); sb.disabled=false; if(fsb)fsb.disabled=false; return; }
+  } catch(e){ toast('Ошибка сети','e'); sb.disabled=false; if(fsb)fsb.disabled=false; return; }
+
+  // Обновляем стейт
+  balance  = d.balance; updBal();
+  if(curCase.price === 0){ freeDone = true; freeNextTs = Date.now() + 6*3600*1000; }
+  curResult = normalizeItem(d.item);
+  inventory.push(curResult);
+  stats.casesOpened++; stats.earned += curResult.price; stats.spent += (curCase.price||0);
+  history.unshift({type:'drop', item: curResult, from: curCase.name, ts: Date.now()});
+
+  // Вставляем результат на позицию 62 в рулетке
+  const track  = document.getElementById('reel-track');
+  const items  = track.querySelectorAll('.reel-item');
+  const TARGET = 62;
+  if(items[TARGET]){
+    items[TARGET].className  = `reel-item r-${curResult.rarity}`;
+    items[TARGET].innerHTML  = _reelCell(curResult).match(/<div class="reel-item[^>]+>([\s\S]+)<\/div>$/)?.[1] ||
+      `<img src="${getSkinImg(curResult)}" style="width:86px;height:64px;object-fit:contain">`;
+    items[TARGET].setAttribute('data-id', curResult.id);
+  }
+
+  // Вычисляем смещение
+  const wrap     = track.parentElement;
+  const vpCenter = wrap.clientWidth / 2;
+  const itemW    = items[0] ? items[0].getBoundingClientRect().width : 110;
+  const gap      = parseFloat(getComputedStyle(track).gap) || 6;
+  const stride   = itemW + gap;
+  const pad      = parseFloat(getComputedStyle(track).paddingLeft) || 8;
+  const itemCenter = pad + TARGET * stride + itemW / 2;
+  const jitter   = (Math.random() - 0.5) * itemW * 0.4;
+  const finalX   = -(itemCenter - vpCenter) + jitter;
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    track.style.transition = 'transform 6.2s cubic-bezier(.03,.96,.06,1)';
+    track.style.transform  = `translateX(${finalX}px)`;
+  }));
+
+  window._spinTimer = setTimeout(() => {
+    window._spinTimer = null;
+    if(!curCase) return;
+    document.getElementById('reel-wrap').style.display  = 'none';
+    document.getElementById('spin-btns-row').style.display = 'none';
+    document.getElementById('multi-btns').style.display = 'none';
+    showResult(curResult);
+  }, 6800);
+}
+
+// ── FAST SPIN — без анимации ──────────────────────────────────────────────
+async function fastSpin(){
+  if(!curCase) return;
+
+  if(curCase.price > 0 && balance < curCase.price){
+    toast('Недостаточно средств!','e'); openDep(); return;
+  }
+  if(curCase.price === 0 && freeDone){
+    const s = Math.max(0, Math.floor((freeNextTs - Date.now()) / 1000));
+    toast(`Следующий бесплатный кейс через ${Math.floor(s/3600)}ч ${Math.floor((s%3600)/60)}м`,'e');
+    return;
+  }
+
+  const sb  = document.getElementById('spin-btn');
+  const fsb = document.getElementById('fast-spin-btn');
+  sb.disabled = true; if(fsb) fsb.disabled = true;
+
+  let d;
+  try{
+    const r = await fetch('/api/spin',{method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({caseId: curCase.id})});
+    d = await r.json();
+    if(!r.ok){ toast(d.error||'Ошибка','e'); sb.disabled=false; if(fsb)fsb.disabled=false; return; }
+  } catch(e){ toast('Ошибка сети','e'); sb.disabled=false; if(fsb)fsb.disabled=false; return; }
+
+  balance = d.balance; updBal();
+  if(curCase.price === 0){ freeDone = true; freeNextTs = Date.now() + 6*3600*1000; }
+  curResult = normalizeItem(d.item);
+  inventory.push(curResult);
+  stats.casesOpened++; stats.earned += curResult.price; stats.spent += (curCase.price||0);
+  history.unshift({type:'drop', item: curResult, from: curCase.name, ts: Date.now()});
+
+  document.getElementById('reel-wrap').style.display  = 'none';
+  document.getElementById('spin-btns-row').style.display = 'none';
+  document.getElementById('multi-btns').style.display = 'none';
+  showResult(curResult);
+
+  sb.disabled = false; if(fsb) fsb.disabled = false;
+}
+
+// ── MULTI OPEN — слот-машина ──────────────────────────────────────────────
+async function openMultiple(count){
+  if(!curCase || curCase.price === 0) return;
+  const total = curCase.price * count;
+  if(balance < total){ toast(`Нужно ${fmt(total)}₽`,'e'); openDep(); return; }
+
+  document.getElementById('reel-wrap').style.display  = 'none';
+  document.getElementById('spin-btns-row').style.display = 'none';
+  document.getElementById('multi-btns').style.display = 'none';
+  document.getElementById('spin-res').classList.remove('show');
+
+  let d;
+  try{
+    const r = await fetch('/api/spin/multi',{method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({caseId: curCase.id, count})});
+    d = await r.json();
+    if(!r.ok){ toast(d.error||'Ошибка','e'); openCaseAgain(); return; }
+  } catch(e){ toast('Ошибка сети','e'); openCaseAgain(); return; }
+
+  balance = d.balance; updBal();
+  const results = d.items.map(normalizeItem);
+  results.forEach(item => {
+    inventory.push(item);
+    stats.casesOpened++; stats.earned += item.price; stats.spent += curCase.price;
+    history.unshift({type:'drop', item, from: curCase.name, ts: Date.now()});
+  });
+
+  _showSlotMachine(results, total, count, curCase.name);
+}
+
+function _showSlotMachine(results, totalCost, count, caseName){
+  const old = document.getElementById('slot-modal');
+  if(old) old.remove();
+
+  const CELLS_BEFORE = 8;
+  const pool = curCase.items.map(id => SKIN_MAP.get(id)).filter(Boolean);
+  const reelCount = Math.min(count, 5);
+
+  let reelsHtml = '';
+  for(let ri = 0; ri < reelCount; ri++){
+    let cells = '';
+    for(let ci = 0; ci < CELLS_BEFORE; ci++){
+      const s = pool[Math.floor(Math.random() * pool.length)];
+      cells += `<div class="slot-cell" style="border-bottom:1px solid var(--border)">
+        <img src="${getSkinImg(s)}" style="width:90px;height:66px;object-fit:contain"
+          onerror="this.onerror=null;this.src='${skinSVG(s).replace(/"/g,"'")}'" >
+        <div class="slot-cell-name" style="color:${RC[s.rarity]}">${s.name.split('|')[1]?.trim()||s.name}</div>
+      </div>`;
+    }
+    const fin = results[ri];
+    cells += `<div class="slot-cell" style="background:${RC[fin.rarity]}18">
+      <img src="${getSkinImg(fin)}" style="width:90px;height:66px;object-fit:contain"
+        onerror="this.onerror=null;this.src='${skinSVG(fin).replace(/"/g,"'")}'" >
+      <div class="slot-cell-name" style="color:${RC[fin.rarity]};font-weight:700">${fin.name.split('|')[1]?.trim()||fin.name}</div>
+    </div>`;
+    reelsHtml += `<div class="slot-reel">
+      <div class="slot-reel-track" id="sreel-${ri}">${cells}</div>
+      <div class="slot-shine"></div><div class="slot-line"></div>
+    </div>`;
+  }
+
+  let extraHtml = '';
+  if(count > 5){
+    extraHtml = `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px">` +
+      results.slice(5).map(it => `<div style="background:var(--bg3);border:1px solid ${RC[it.rarity]}44;border-radius:8px;padding:6px 8px;text-align:center;width:96px">
+        <img src="${getSkinImg(it)}" style="width:70px;height:52px;object-fit:contain;display:block;margin:0 auto 2px"
+          onerror="this.onerror=null;this.src='${skinSVG(it).replace(/"/g,"'")}'" >
+        <div style="font-size:10px;color:${RC[it.rarity]};font-weight:700">${it.name.split('|')[1]?.trim()||it.name}</div>
+        <div style="font-size:11px;font-weight:800;color:${RC[it.rarity]}">${fmt(it.price)}</div>
+      </div>`).join('') + '</div>';
+  }
 
   const modal = document.createElement('div');
-  modal.className = 'slot-modal';
-  modal.id = 'slot-modal';
-
-  // Для слота берём первые min(count,5) барабанов
-  const reelCount = Math.min(count, 5);
-  // Для каждого барабана готовим стек ячеек (случайные + финальный внизу)
-  const CELLS_BEFORE = 8; // сколько прокрутить перед результатом
-
-  function cellHTML(item, highlight=false) {
-    const s = SKIN_MAP ? SKIN_MAP.get(item.id||item.skinId) : null;
-    const skinName = s ? s.name : (item.name||'');
-    const fb = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='66'><rect width='90' height='66' fill='%23222'/><text x='45' y='38' text-anchor='middle' fill='%23888' font-size='10'>?</text></svg>`;
-    return `<div class="slot-cell" style="border-bottom:1px solid var(--border);${highlight?'background:'+RC[item.rarity]+'22;':''}" >
-      <img src="${getSkinImg(item)}" alt="${skinName}" onerror="this.onerror=null;this.src='${fb}'" style="width:90px;height:66px;object-fit:contain;">
-      <div class="slot-cell-name" style="color:${RC[item.rarity]}">${skinName.split('|')[1]?.trim()||skinName}</div>
-    </div>`;
-  }
-
-  // Набор "мусорных" предметов для прокрутки
-  const pool = curCase ? curCase.items.map(id=>{
-    const s = SKINS.find(x=>x.id===id);
-    return s ? normalizeItem(s) : null;
-  }).filter(Boolean) : results;
-
-  let reelsHTML = '';
-  for(let ri=0; ri<reelCount; ri++){
-    const finalItem = results[ri];
-    let cells = '';
-    for(let ci=0; ci<CELLS_BEFORE; ci++){
-      const rand = pool[Math.floor(Math.random()*pool.length)];
-      cells += cellHTML(rand);
-    }
-    cells += cellHTML(finalItem, true); // финальный — последний
-    reelsHTML += `<div class="slot-reel">
-      <div class="slot-reel-track" id="sreel-${ri}" style="transform:translateY(0)">${cells}</div>
-      <div class="slot-shine"></div>
-      <div class="slot-line"></div>
-    </div>`;
-  }
-
-  // Если count > 5 — остальные просто иконки
-  let extraHTML = '';
-  if(count > 5){
-    extraHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px">` +
-      results.slice(5).map(item=>`<div style="background:var(--bg3);border:1px solid ${RC[item.rarity]}44;border-radius:8px;padding:6px 8px;text-align:center;width:100px;">
-        <img src="${getSkinImg(item)}" style="width:70px;height:52px;object-fit:contain;display:block;margin:0 auto 2px">
-        <div style="font-size:10px;color:${RC[item.rarity]};line-height:1.2">${item.name?.split('|')[1]?.trim()||item.name}</div>
-        <div style="font-size:11px;font-weight:700;color:${RC[item.rarity]}">${fmt(item.price)}</div>
-      </div>`).join('') + `</div>`;
-  }
-
+  modal.className = 'slot-modal'; modal.id = 'slot-modal';
   modal.innerHTML = `<div class="slot-modal-box">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:2px;text-align:center;margin-bottom:4px">${caseName} × ${count}</div>
-    <div style="font-size:12px;color:var(--text2);text-align:center;margin-bottom:16px">Потрачено: ${fmt(totalCost)}</div>
-    <div class="slot-reels" id="slot-reels-wrap">${reelsHTML}</div>
-    ${extraHTML}
-    <div id="slot-results-grid" style="display:none;margin-top:12px"></div>
-    <div id="slot-actions" style="display:none;margin-top:16px;display:none;gap:8px;justify-content:center;flex-wrap:wrap"></div>
+    <div style="font-size:12px;color:var(--text2);text-align:center;margin-bottom:14px">Потрачено: ${fmt(totalCost)}</div>
+    <div class="slot-reels">${reelsHtml}</div>
+    ${extraHtml}
+    <div id="slot-results" style="display:none;margin-top:14px"></div>
+    <div id="slot-actions" style="display:none;margin-top:12px;gap:8px;justify-content:center;flex-wrap:wrap"></div>
   </div>`;
-
   document.body.appendChild(modal);
 
-  // Запускаем анимацию с задержкой для каждого барабана
+  // Запускаем прокрутку барабанов
   const CELL_H = 160;
-  const TARGET_OFFSET = -(CELLS_BEFORE * CELL_H); // прокручиваем до финального
-
-  for(let ri=0; ri<reelCount; ri++){
+  for(let ri = 0; ri < reelCount; ri++){
     const track = document.getElementById(`sreel-${ri}`);
-    const delay = ri * 180; // каждый барабан чуть позже
-    setTimeout(()=>{
+    setTimeout(() => {
       track.classList.add('spinning');
-      track.style.transform = `translateY(${TARGET_OFFSET}px)`;
-    }, 50 + delay);
+      track.style.transform = `translateY(${-CELLS_BEFORE * CELL_H}px)`;
+    }, 50 + ri * 180);
   }
 
-  // После завершения анимации — показываем итоги
-  const totalDelay = 50 + (reelCount-1)*180 + 3500 + 600;
-  setTimeout(()=>{
-    // Показываем полную сетку результатов
-    const grid = document.getElementById('slot-results-grid');
-    const actions = document.getElementById('slot-actions');
-    if(!grid||!actions) return;
+  // После анимации — показываем итоги
+  setTimeout(() => {
+    const resGrid = document.getElementById('slot-results');
+    const actDiv  = document.getElementById('slot-actions');
+    if(!resGrid || !actDiv) return;
 
-    grid.style.display='grid';
-    grid.style.gridTemplateColumns='repeat(auto-fill,minmax(120px,1fr))';
-    grid.style.gap='8px';
-    grid.innerHTML = results.map(item=>`
-      <div style="background:var(--bg3);border:1px solid ${RC[item.rarity]}44;border-radius:10px;padding:8px;text-align:center;cursor:pointer" onclick="slotQuickSell('${item.uid}',this)">
-        <img src="${getSkinImg(item)}" style="width:80px;height:58px;object-fit:contain;display:block;margin:0 auto 4px;filter:drop-shadow(0 3px 8px ${RC[item.rarity]}66)">
-        <div style="color:${RC[item.rarity]};font-size:11px;font-weight:700;line-height:1.2;margin-bottom:2px">${item.name?.split('|')[1]?.trim()||item.name}</div>
-        <div style="color:var(--text2);font-size:10px">${item.wear||''}</div>
-        <div style="color:${RC[item.rarity]};font-size:12px;font-weight:800;margin-top:2px">${fmt(item.price)}</div>
-        <div style="font-size:9px;color:var(--text3);margin-top:3px">нажать — продать</div>
+    resGrid.style.display = 'grid';
+    resGrid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(110px,1fr))';
+    resGrid.style.gap = '8px';
+    resGrid.innerHTML = results.map(it => `
+      <div style="background:var(--bg3);border:1px solid ${RC[it.rarity]}44;border-radius:10px;padding:8px;text-align:center;cursor:pointer"
+        onclick="_slotSellOne('${it.uid}',this)">
+        <img src="${getSkinImg(it)}" style="width:76px;height:56px;object-fit:contain;display:block;margin:0 auto 4px;filter:drop-shadow(0 2px 6px ${RC[it.rarity]}88)"
+          onerror="this.onerror=null;this.src='${skinSVG(it).replace(/"/g,"'")}'" >
+        <div style="color:${RC[it.rarity]};font-size:11px;font-weight:700;line-height:1.2;margin-bottom:2px">${it.name.split('|')[1]?.trim()||it.name}</div>
+        <div style="color:${RC[it.rarity]};font-size:12px;font-weight:800">${fmt(it.price)}</div>
+        <div style="font-size:9px;color:var(--text3);margin-top:2px">нажать → продать</div>
       </div>`).join('');
 
-    actions.style.display='flex';
-    actions.innerHTML = `
-      <button class="btn btn-sell" onclick="slotSellAll()">Продать всё</button>
-      <button class="btn" onclick="closeSlotModal()">Забрать всё</button>`;
+    actDiv.style.display = 'flex';
+    actDiv.innerHTML = `
+      <button class="btn btn-sell" onclick="_slotSellAll()">Продать всё</button>
+      <button class="btn" onclick="_closeSlot()">Забрать всё</button>`;
 
-    // Сохраняем uid для продажи всего
-    modal.dataset.allUids = results.map(r=>r.uid).join(',');
-  }, totalDelay);
+    modal.dataset.uids = results.map(r => r.uid).join(',');
+  }, 50 + (reelCount-1)*180 + 3500 + 600);
 }
 
-async function slotQuickSell(uid, el) {
-  el.style.opacity='0.5'; el.style.pointerEvents='none';
+async function _slotSellOne(uid, el){
+  el.style.opacity = '0.4'; el.style.pointerEvents = 'none';
   try{
-    const r=await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:uid})});
-    const d=await r.json();
-    if(!r.ok){toast(d.error||'Ошибка','e');el.style.opacity='1';el.style.pointerEvents='';return;}
-    const idx=inventory.findIndex(i=>i.uid===uid);
-    if(idx>-1){stats.earned+=inventory[idx].price;inventory.splice(idx,1);}
-    balance=d.balance; updBal();
-    el.style.opacity='0.3';
-    el.querySelector('div:last-child').textContent='✓ Продано';
-    toast(`Продано — ${fmt(d.sold)}`,'s');
-  }catch(e){toast('Ошибка сети','e');el.style.opacity='1';el.style.pointerEvents='';}
+    const r = await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:uid})});
+    const d = await r.json();
+    if(!r.ok){ toast(d.error||'Ошибка','e'); el.style.opacity='1'; el.style.pointerEvents=''; return; }
+    const idx = inventory.findIndex(i => i.uid === uid);
+    if(idx > -1) inventory.splice(idx,1);
+    balance = d.balance; updBal();
+    el.querySelector('div:last-child').textContent = '✓ Продано';
+    toast(`+${fmt(d.sold)}`,'s');
+  } catch(e){ toast('Ошибка сети','e'); el.style.opacity='1'; el.style.pointerEvents=''; }
 }
 
-async function slotSellAll() {
+async function _slotSellAll(){
   const modal = document.getElementById('slot-modal');
   if(!modal) return;
-  const uids = (modal.dataset.allUids||'').split(',').filter(Boolean);
-  let total=0,sold=0;
+  const uids = (modal.dataset.uids||'').split(',').filter(Boolean);
+  let total = 0;
   for(const uid of uids){
     try{
-      const r=await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:uid})});
-      const d=await r.json();
-      if(r.ok){
-        const idx=inventory.findIndex(i=>i.uid===uid);
-        if(idx>-1){total+=inventory[idx].price;inventory.splice(idx,1);}
-        balance=d.balance; sold++;
-      }
-    }catch(e){}
+      const r = await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:uid})});
+      const d = await r.json();
+      if(r.ok){ const idx=inventory.findIndex(i=>i.uid===uid); if(idx>-1){total+=inventory[idx].price;inventory.splice(idx,1);} balance=d.balance; }
+    } catch(e){}
   }
   updBal();
-  if(sold>0) toast(`Продано ${sold} предметов — ${fmt(total)}`,'s');
-  closeSlotModal();
+  if(total > 0) toast(`Продано — ${fmt(total)}`,'s');
+  _closeSlot();
 }
 
-function closeSlotModal() {
+function _closeSlot(){
   const m = document.getElementById('slot-modal');
   if(m) m.remove();
   openCaseAgain();
-}
-
-
-async function quickSell(uid, el) {
-  el.style.opacity='0.5'; el.style.pointerEvents='none';
-  try {
-    const r=await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:uid})});
-    const d=await r.json();
-    if(!r.ok){toast(d.error||'Ошибка продажи','e');el.style.opacity='1';el.style.pointerEvents='';return;}
-    const idx=inventory.findIndex(i=>i.uid===uid);
-    if(idx>-1){const item=inventory[idx];stats.earned+=item.price;inventory.splice(idx,1);}
-    balance=d.balance; updBal();
-    el.style.opacity='0.3';
-    el.querySelector('div:last-child').textContent='✓ Продано';
-    toast(`Продано — ${fmt(d.sold)}`,'s');
-  } catch(e){toast('Ошибка сети','e');el.style.opacity='1';el.style.pointerEvents='';}
-}
-async function sellAllMulti() {
-  const uids=(document.getElementById('spin-res').dataset.multiUids||'').split(',').filter(Boolean);
-  let total=0,sold=0;
-  for(const uid of uids){
-    try{
-      const r=await fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemUid:uid})});
-      const d=await r.json();
-      if(r.ok){
-        const idx=inventory.findIndex(i=>i.uid===uid);
-        if(idx>-1){total+=inventory[idx].price;inventory.splice(idx,1);}
-        balance=d.balance; sold++;
-      }
-    }catch(e){}
-  }
-  updBal();
-  if(sold>0)toast(`Продано ${sold} предметов — ${fmt(total)}`,'s');
-  openCaseAgain();
-}
-function imgTag(s, cls='') {
-  const fb = skinSVG(s).replace(/"/g,"'");
-  return `<img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy" ${cls?`class="${cls}"`:''}
-    onerror="this.onerror=null;this.src=skinSVG(SKINS.find(x=>x.id==${s.id})||this.dataset)||'';this.style.opacity='.7'">`;
-}
-function renderCaseContents(){
-  const items=curCase.items.map(skin).filter(Boolean);
-  document.getElementById('case-contents').innerHTML=items.map(s=>`
-    <div class="ci r-${s.rarity}">
-      <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy"
-        onerror="this.onerror=null;this.src='${skinSVG(s).replace(/'/g,"\\'")}'" style="width:84px;height:62px;object-fit:contain;display:block;margin:0 auto 4px">
-      <div class="ci-name">${s.name}</div>
-      <div class="ci-price" style="color:${RC[s.rarity]}">${fmt(s.price)}</div>
-    </div>
-  `).join('');
-}
-// REEL constants — must match CSS exactly
-// .reel-item width=110px, gap=6px between items, track padding=6px on all sides
-const REEL_ITEM_W  = 110;
-const REEL_GAP     = 6;
-const REEL_PAD     = 6;   // track left padding
-const REEL_STRIDE  = REEL_ITEM_W + REEL_GAP; // 116px per slot
-
-function buildReel(){
-  const track=document.getElementById('reel-track');
-  track.style.transition='none';
-  void track.offsetWidth;
-  track.style.transform='translateX(0)';
-  const pool=curCase.items.map(skin).filter(Boolean);
-  let html='';
-  for(let i=0;i<80;i++){
-    const s=pool[Math.floor(Math.random()*pool.length)];
-    const fb=skinSVG(s).replace(/'/g,"\\'");
-    html+=`<div class="reel-item r-${s.rarity}" data-id="${s.id}">
-      <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy"
-        onerror="this.onerror=null;this.src='${fb}'"
-        style="width:86px;height:64px;object-fit:contain;">
-      <div class="reel-item-name">${s.name}</div>
-    </div>`;
-  }
-  track.innerHTML=html;
-}
-
-async function spinCase(){
-  if(!curCase)return;
-  if(curCase.price>0&&balance<curCase.price){toast('Недостаточно средств!','e');openDep();return;}
-  if(curCase.price===0&&freeDone){
-    const secsLeft=Math.max(0,Math.floor((freeNextTs-Date.now())/1000));
-    const h=Math.floor(secsLeft/3600),m=Math.floor((secsLeft%3600)/60);
-    toast(`Следующий бесплатный кейс через ${h}ч ${m}м`,'e');return;
-  }
-
-  document.getElementById('spin-btn').disabled=true;
-
-  try {
-    const r=await fetch('/api/spin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caseId:curCase.id})});
-    const d=await r.json();
-    if(!r.ok){toast(d.error||'Ошибка','e');document.getElementById('spin-btn').disabled=false;const fsbe=document.getElementById('fast-spin-btn');if(fsbe)fsbe.disabled=false;return;}
-
-    balance=d.balance; updBal();
-    if(curCase.price===0){freeDone=true;freeNextTs=Date.now()+6*3600*1000;}
-    curResult=normalizeItem(d.item);
-    inventory.push(curResult);
-    stats.casesOpened++;
-    stats.earned+=curResult.price;
-    stats.spent+=(curCase.price||0);
-    history.unshift({type:'drop',item:curResult,from:curCase.name,ts:Date.now()});
-
-    const track=document.getElementById('reel-track');
-    const items=track.querySelectorAll('.reel-item');
-    const TARGET_IDX=62;
-    if(items[TARGET_IDX]){
-      const fb=skinSVG(curResult).replace(/'/g,"\\'");
-      items[TARGET_IDX].className=`reel-item r-${curResult.rarity}`;
-      items[TARGET_IDX].innerHTML=`<img src="${getSkinImg(curResult)}" alt="${curResult.name}" loading="lazy"
-        onerror="this.onerror=null;this.src='${fb}'"
-        style="width:86px;height:64px;object-fit:contain;">
-        <div class="reel-item-name">${curResult.name}</div>`;
-      items[TARGET_IDX].setAttribute('data-id',curResult.id);
-    }
-    const trackWrap=track.parentElement;
-    const vpCenter=trackWrap.clientWidth/2;
-    const firstItem=items[0];
-    const realItemW=firstItem?firstItem.getBoundingClientRect().width:REEL_ITEM_W;
-    const computedGap=parseFloat(getComputedStyle(track).gap)||REEL_GAP;
-    const realStride=realItemW+computedGap;
-    const realPad=parseFloat(getComputedStyle(track).paddingLeft)||REEL_PAD;
-    const itemCenter=realPad+TARGET_IDX*realStride+realItemW/2;
-    const jitter=(Math.random()-0.5)*(realItemW*0.5);
-    const finalX=-(itemCenter-vpCenter)+jitter;
-
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        track.style.transition='transform 6.2s cubic-bezier(.03,.96,.06,1)';
-        track.style.transform=`translateX(${finalX}px)`;
-      });
-    });
-
-    window._spinTimer=setTimeout(()=>{
-      window._spinTimer=null;
-      if(!curCase)return;
-      showResult(curResult);
-      document.getElementById('spin-btn').style.display='none';
-      document.getElementById('spin-btns-row').style.display='none';
-      document.getElementById('reel-wrap').style.display='none';
-      const mb=document.getElementById('multi-btns');
-      if(mb)mb.style.display='none';
-    },6800);
-  } catch(e){toast('Ошибка сети','e');document.getElementById('spin-btn').disabled=false;}
-}
-// ── Быстрое открытие кейса (без анимации рулетки) ──────────────────────
-async function fastSpin(){
-  if(!curCase)return;
-  if(curCase.price>0&&balance<curCase.price){toast('Недостаточно средств!','e');openDep();return;}
-  if(curCase.price===0&&freeDone){
-    const secsLeft=Math.max(0,Math.floor((freeNextTs-Date.now())/1000));
-    const h=Math.floor(secsLeft/3600),m=Math.floor((secsLeft%3600)/60);
-    toast(`Следующий бесплатный кейс через ${h}ч ${m}м`,'e');return;
-  }
-  document.getElementById('spin-btn').disabled=true;
-  document.getElementById('fast-spin-btn').disabled=true;
-  try{
-    const r=await fetch('/api/spin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caseId:curCase.id})});
-    const d=await r.json();
-    if(!r.ok){toast(d.error||'Ошибка','e');document.getElementById('spin-btn').disabled=false;document.getElementById('fast-spin-btn').disabled=false;return;}
-    balance=d.balance; updBal();
-    if(curCase.price===0){freeDone=true;freeNextTs=Date.now()+6*3600*1000;}
-    curResult=normalizeItem(d.item);
-    inventory.push(curResult);
-    stats.casesOpened++; stats.earned+=curResult.price; stats.spent+=(curCase.price||0);
-    history.unshift({type:'drop',item:curResult,from:curCase.name,ts:Date.now()});
-    // Показать результат сразу без анимации
-    document.getElementById('reel-wrap').style.display='none';
-    document.getElementById('spin-btns-row').style.display='none';
-    document.getElementById('multi-btns').style.display='none';
-    showResult(curResult);
-    document.getElementById('spin-res').classList.add('show');
-  }catch(e){toast('Ошибка сети','e');}
-  document.getElementById('spin-btn').disabled=false;
-  document.getElementById('fast-spin-btn').disabled=false;
 }
 
 

@@ -30,8 +30,8 @@ function weightedRoll(skinIds, casePrice, balance, inventoryValue) {
   };
   const df = drainFactor(balance, inventoryValue);
 
-  // Скрытый лимит: предметы дороже 2× цены кейса не выпадают
-  const priceLimit = casePrice > 0 ? casePrice * 2 : Infinity;
+  // Лимит: предметы дороже 4× цены кейса не выпадают (баланс выплат)
+  const priceLimit = casePrice > 0 ? casePrice * 4 : Infinity;
 
   let items = [];
   let totalW = 0;
@@ -54,8 +54,11 @@ function weightedRoll(skinIds, casePrice, balance, inventoryValue) {
   }
 
   if (items.length === 0) {
-    // fallback — без лимита
-    return weightedRoll(skinIds, 0, balance, inventoryValue);
+    // fallback — берём самые дешёвые предметы кейса
+    const cheapest = skinIds.map(id => SKIN_MAP.get(id)).filter(Boolean)
+      .sort((a,b) => a.price - b.price).slice(0, 5);
+    if (cheapest.length === 0) return SKIN_MAP.values().next().value;
+    return cheapest[Math.floor(Math.random() * cheapest.length)];
   }
 
   let r = Math.random() * totalW;
