@@ -1540,6 +1540,10 @@ document.addEventListener('keydown', e=>{
 });
 
 let inventory=[], history=[], curCase=null, curResult=null;
+// Нормализация предмета — всегда имеет поле .id (числовой skinId)
+function normalizeItem(item){
+  return { ...item, id: Number(item.id ?? item.skinId) };
+}
 let selMode=null, upgSrc=null, upgDst=null, cSlots=new Array(10).fill(null);
 let freeDone=false, nick='Игрок';
 let stats={spent:0,earned:0,casesOpened:0,upgradeWin:0,upgradeLoss:0,contracts:0};
@@ -1790,6 +1794,7 @@ async function openMultiple(count) {
     balance=d.balance; updBal();
     const results=d.items;
     results.forEach(item=>{
+      item=normalizeItem(item);
       inventory.push(item);
       stats.casesOpened++;
       stats.earned+=item.price;
@@ -1913,7 +1918,7 @@ async function spinCase(){
 
     balance=d.balance; updBal();
     if(curCase.price===0) freeDone=true;
-    curResult={...d.item};
+    curResult=normalizeItem(d.item);
     inventory.push(curResult);
     stats.casesOpened++;
     stats.earned+=curResult.price;
@@ -2425,7 +2430,7 @@ async function doUpgrade(){
       setTimeout(()=>{
         if(d.won){
           stats.upgradeWin++;
-          const newItem={...d.item};
+          const newItem=normalizeItem(d.item);
           inventory.push(newItem);
           history.unshift({type:'upgrade',item:{...newItem},from:'Апгрейд',ts:Date.now()});
           stats.earned+=dstSnap.price;
@@ -2589,7 +2594,7 @@ async function execContract(){
     stats.spent+=total;
     stats.contracts++;
 
-    const result=d.item;
+    const result=normalizeItem(d.item);
     inventory.push(result);
     history.unshift({type:'contract',item:{...result},from:title,ts:Date.now()});
     stats.earned+=result.price;
@@ -2731,7 +2736,7 @@ function applyState(state) {
 
   nick      = state.nick || 'Игрок';
   balance   = state.balance || 0;
-  inventory = (state.inventory || []).map(item => ({
+  inventory = (state.inventory || []).map(item => normalizeItem({
     ...item,
     uid: item.uid,
     id: item.skinId,
