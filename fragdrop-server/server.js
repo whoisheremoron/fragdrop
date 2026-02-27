@@ -12,6 +12,7 @@ const path          = require('path');
 const { SKINS, CASES, SKIN_MAP, CASE_MAP } = require('./game/data');
 const { weightedRoll, resolveUpgrade, resolveContract, randWear, uid } = require('./game/logic');
 const DB = require('./db');
+const { syncPrices } = require('./price-sync');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -139,7 +140,8 @@ app.get('/api/state', (req, res) => {
     nick:      player.nick,
     steamId:   player.steam_id,
     avatar:    player.steam_avatar || null,
-    freeDone:  player.free_done === 1,
+    freeDone:  player.free_last_ts > 0 && (Math.floor(Date.now()/1000) - player.free_last_ts) < 6*3600,
+    freeNextTs: player.free_last_ts > 0 ? (player.free_last_ts + 6*3600) * 1000 : 0,
     stats: {
       casesOpened: player.cases_opened,
       upgradeWin:  player.upgrade_win,
@@ -171,8 +173,15 @@ app.post('/api/spin', requireAuth, (req, res) => {
   if (!caseData) return res.status(400).json({ error: 'Кейс не найден' });
 
   const player = DB.getPlayer(sid);
-  if (caseData.price === 0 && player.free_done === 1)
-    return res.status(400).json({ error: 'Бесплатный кейс уже получен' });
+  if (caseData.price === 0) {
+    const now = Math.floor(Date.now()/1000);
+    const cooldown = 6 * 3600;
+    if (player.free_last_ts > 0 && (now - player.free_last_ts) < cooldown) {
+      const secsLeft = cooldown - (now - player.free_last_ts);
+      const h = Math.floor(secsLeft/3600), m = Math.floor((secsLeft%3600)/60);
+      return res.status(400).json({ error: `Следующий бесплатный кейс через ${h}ч ${m}м` });
+    }
+  }
   if (caseData.price > 0 && player.balance < caseData.price)
     return res.status(400).json({ error: 'Недостаточно средств' });
 
@@ -244,19 +253,31 @@ app.post('/api/sell', requireAuth, (req, res) => {
 
 app.post('/api/upgrade', requireAuth, (req, res) => {
   const sid = req.steamId;
-  const { srcUid, srcSkinId, dstSkinId } = req.body;
+  const { srcUid, srcSkinId, dstSkinId, extraBet = 0 } = req.body;
   if (!srcUid || !srcSkinId || !dstSkinId) return res.status(400).json({ error: 'Неверные параметры' });
 
   const srcSkinIdNum = Number(srcSkinId);
   const dstSkinIdNum = Number(dstSkinId);
+  const betAmount    = Math.max(0, Number(extraBet) || 0);
+
+  const player = DB.getPlayer(sid);
+  if (betAmount > 0 && player.balance < betAmount)
+    return res.status(400).json({ error: 'Недостаточно средств для доплаты' });
+
   const inventory = DB.getInventory(sid).map(r => ({ uid: r.uid, skinId: Number(r.skin_id) }));
-  const result    = resolveUpgrade(srcSkinIdNum, srcUid, dstSkinIdNum, inventory);
+  const result    = resolveUpgrade(srcSkinIdNum, srcUid, dstSkinIdNum, inventory, betAmount);
   if (result.error) return res.status(400).json({ error: result.error });
 
   const srcSkin = SKIN_MAP.get(srcSkinIdNum);
   const dstSkin = SKIN_MAP.get(dstSkinIdNum);
 
   DB.db.transaction(() => {
+    // Списываем доплату если была
+    if (betAmount > 0) {
+      const p = DB.getPlayer(sid);
+      DB.stmts.updateBalance.run(p.balance - betAmount, sid);
+      DB.stmts.updateStats.run({ co:0,uw:0,ul:0,ct:0,sp:betAmount,ea:0,td:0,fd:0,sid });
+    }
     DB.removeItem(sid, result.removedUid);
     if (result.won) {
       DB.addItem(sid, result.item);
@@ -311,6 +332,15 @@ app.post('/api/nick', requireAuth, (req, res) => {
   DB.db.prepare('UPDATE players SET nick = ? WHERE steam_id = ?').run(clean, req.steamId);
   res.json({ nick: clean });
 });
+
+// ── Автосинхронизация цен каждые 6 часов ────────────────
+const SYNC_INTERVAL_MS = 6 * 60 * 60 * 1000;
+function autoSync() {
+  syncPrices()
+    .then(r => console.log(`[auto-sync] Обновлено ${r.updated}/${r.total} цен`))
+    .catch(e => console.error('[auto-sync] Ошибка:', e.message));
+}
+setTimeout(() => { autoSync(); setInterval(autoSync, SYNC_INTERVAL_MS); }, 30000);
 
 // ── Start ──────────────────────────────────────────────────
 app.listen(PORT, () => {

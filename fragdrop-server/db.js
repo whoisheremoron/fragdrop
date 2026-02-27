@@ -10,6 +10,9 @@ const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// ── Миграция — добавляем новые поля если их нет (для существующих БД) ──────
+try { db.exec('ALTER TABLE players ADD COLUMN free_last_ts INTEGER NOT NULL DEFAULT 0'); } catch(e) {}
+
 // ── Схема ──────────────────────────────────────────────────────────────────
 // Основной ключ игрока — steam_id (не session_id)
 // session_id используется только как временный указатель на steam_id
@@ -27,6 +30,7 @@ db.exec(`
     spent           REAL    NOT NULL DEFAULT 0,
     earned          REAL    NOT NULL DEFAULT 0,
     free_done       INTEGER NOT NULL DEFAULT 0,
+    free_last_ts    INTEGER NOT NULL DEFAULT 0,
     created_at      INTEGER NOT NULL DEFAULT (unixepoch())
   );
 
@@ -76,7 +80,8 @@ const stmts = {
       spent           = spent           + @sp,
       earned          = earned          + @ea,
       total_deposited = total_deposited + @td,
-      free_done       = CASE WHEN @fd = 1 THEN 1 ELSE free_done END
+      free_done       = CASE WHEN @fd = 1 THEN 1 ELSE free_done END,
+      free_last_ts    = CASE WHEN @fd = 1 THEN unixepoch() ELSE free_last_ts END
     WHERE steam_id = @sid
   `),
 

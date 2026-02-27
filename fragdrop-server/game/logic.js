@@ -72,7 +72,7 @@ function upgradeChance(srcPrice, dstPrice) {
 }
 
 // Апгрейд — возвращает { won, item|null }
-function resolveUpgrade(srcId, srcUid, dstId, inventory, balance) {
+function resolveUpgrade(srcId, srcUid, dstId, inventory, extraBet = 0) {
   const src = SKIN_MAP.get(srcId);
   const dst = SKIN_MAP.get(dstId);
   if (!src || !dst) return { error: 'Предмет не найден' };
@@ -82,7 +82,8 @@ function resolveUpgrade(srcId, srcUid, dstId, inventory, balance) {
   const invIdx = inventory.findIndex(i => i.uid === srcUid && i.skinId === srcId);
   if (invIdx === -1) return { error: 'Предмет не найден в инвентаре' };
 
-  const chance = upgradeChance(src.price, dst.price);
+  const boost = Math.max(0, Number(extraBet) || 0);
+  const chance = upgradeChance(src.price + boost, dst.price);
   // Скрытый незаход для дорогих скинов
   const guaranteedLoss = dst.price > UPGRADE_GUARANTEED_LOSS_THRESHOLD;
   const won = guaranteedLoss ? false : (Math.random() * 100 < chance);
