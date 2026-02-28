@@ -1,7 +1,6 @@
 'use strict';
 
-function CDN(name){ return `https://community.akamai.steamstatic.com/economy/image/class/730/${encodeURIComponent(name)}/256fx192f`; }
-function IMG(n){ return `https://steamcommunity-a.akamaihd.net/economy/image/class/730/${encodeURIComponent(n)}`; }
+function IMG(n){ return `https://cdn.cs.money/CS2/skins/render/512x384/${encodeURIComponent(n)}.png`; }
 
 const SKINS = [
   // ── Ножи ─────────────────────────────────────────────────────────────────

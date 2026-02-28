@@ -135,6 +135,9 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
 .btn-primary{background:var(--accentg);border:none;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:10px 22px;border-radius:9px;cursor:pointer;transition:.18s;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;}
 .btn-primary:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 5px 18px rgba(232,160,32,.3);}
 .btn-primary:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-fast{background:linear-gradient(135deg,#1e272e,#2c3e50);border:1px solid #465566;color:#a0b4c8;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:10px 18px;border-radius:9px;cursor:pointer;transition:.18s;white-space:nowrap;flex-shrink:0;}
+.btn-fast:hover{border-color:#7f8c8d;color:#ecf0f1;background:linear-gradient(135deg,#2c3e50,#34495e);}
+.btn-fast:disabled{opacity:.3;cursor:not-allowed;}
 .btn-sell{background:rgba(39,174,96,.12);border:1px solid rgba(39,174,96,.3);color:var(--green);}
 .btn-sell:hover{background:rgba(39,174,96,.2);border-color:var(--green);}
 .btn-profile{background:rgba(74,144,217,.12);border:1px solid rgba(74,144,217,.3);color:var(--blue);}
@@ -826,7 +829,7 @@ main{max-width:1440px;margin:0 auto;padding:24px 20px;}
       </div>
       <div style="display:flex;gap:8px;margin-top:0" id="spin-btns-row">
         <button class="btn-primary" id="spin-btn" onclick="spinCase()" style="flex:1">Открыть кейс</button>
-        <button class="btn-primary" id="fast-spin-btn" onclick="fastSpin()" style="flex:0 0 auto;background:linear-gradient(135deg,#2c3e50,#34495e);font-size:13px;padding:10px 16px;" title="Быстрое открытие без анимации">⚡ Быстро</button>
+        <button class="btn-fast" id="fast-spin-btn" onclick="fastSpin()" title="Быстрое открытие без анимации">⚡ БЫСТРО</button>
       </div>
       <div style="display:flex;gap:8px;justify-content:center;margin-top:8px" id="multi-btns">
         <button class="btn multi-open-btn" onclick="openMultiple(3)">× 3</button>
@@ -1293,18 +1296,20 @@ function caseSVG(name, color) {
   return svgToDataURL(svg);
 }
 
+// cs.money CDN — прямой URL по market_hash_name, без авторизации
+function _skinCDN(n) {
+  return 'https://cdn.cs.money/CS2/skins/render/512x384/' + encodeURIComponent(n) + '.png';
+}
 function getSkinImg(s) {
   if (s.img) return s.img;
-  // Fallback: прокси через сервер по имени скина
-  if (s.name) return `/api/item-image?name=${encodeURIComponent(s.rarity==='knife'?'★ '+s.name:s.name)}`;
+  if (s.name) return _skinCDN(s.rarity === 'knife' ? '★ ' + s.name : s.name);
   return skinSVG(s);
 }
 
 // ═══════════════════════════════════════════════════════
-//  SKINS — РЕАЛЬНЫЕ цены из market.csgo.com API /v2/prices/RUB.json
-//  Картинки: steamcommunity-a.akamaihd.net CDN
+//  SKINS
 // ═══════════════════════════════════════════════════════
-const IMG = (n) => `/api/item-image?name=${encodeURIComponent(n)}`;
+const IMG = (n) => _skinCDN(n);
 
 const SKINS = [
   // ══ KNIVES — Special rarity (жёлтые) ══

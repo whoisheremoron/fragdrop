@@ -47,8 +47,8 @@ app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Rate limiting ─────────────────────────────────────────
-app.use('/api', rateLimit({ windowMs: 60_000, max: 120, standardHeaders: true, legacyHeaders: false, message: { error: 'Слишком много запросов' } }));
-app.use('/api/spin', rateLimit({ windowMs: 10_000, max: 15, message: { error: 'Слишком быстро' } }));
+app.use('/api', rateLimit({ windowMs: 60_000, max: 600, standardHeaders: true, legacyHeaders: false, message: { error: 'Слишком много запросов' } }));
+app.use('/api/spin', rateLimit({ windowMs: 5_000, max: 10, message: { error: 'Слишком быстро' } }));
 
 // ── Passport Steam ────────────────────────────────────────
 passport.use(new SteamStrategy(
@@ -333,52 +333,6 @@ app.post('/api/nick', requireAuth, (req, res) => {
   res.json({ nick: clean });
 });
 
-// ── Image proxy — получает реальный icon_url через Steam Market API ──────
-const imageCache = new Map(); // market_hash_name → icon_url, expires
-
-app.get('/api/item-image', async (req, res) => {
-  const name = req.query.name;
-  if (!name) return res.status(400).send('Missing name');
-
-  // Проверяем кэш
-  const cached = imageCache.get(name);
-  if (cached && cached.expires > Date.now()) {
-    return res.redirect(302, cached.url);
-  }
-
-  try {
-    const encoded = encodeURIComponent(name);
-    const apiUrl = `https://steamcommunity.com/market/listings/730/${encoded}/render?currency=5&language=english&count=1&start=0`;
-    
-    const response = await fetch(apiUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(5000),
-    });
-    
-    if (!response.ok) throw new Error('Steam API ' + response.status);
-    
-    const data = await response.json();
-    // Steam Market render API возвращает listinginfo с asset данными
-    const listings = data.listinginfo || {};
-    const firstKey = Object.keys(listings)[0];
-    if (!firstKey) throw new Error('No listings');
-    
-    const assetId = listings[firstKey].asset?.id;
-    const assets = data.assets?.[730]?.['2'];
-    const asset = assets?.[assetId];
-    const iconUrl = asset?.icon_url;
-    
-    if (!iconUrl) throw new Error('No icon_url');
-    
-    const fullUrl = 'https://community.akamai.steamstatic.com/economy/image/' + iconUrl + '/256fx192f';
-    imageCache.set(name, { url: fullUrl, expires: Date.now() + 24 * 3600 * 1000 });
-    res.redirect(302, fullUrl);
-  } catch (e) {
-    // Fallback — пустая картинка
-    console.error('[image-proxy] Error for', name, ':', e.message);
-    res.status(404).send('Image not found');
-  }
-});
 
 // ── Автосинхронизация цен каждые 6 часов ────────────────
 const SYNC_INTERVAL_MS = 6 * 60 * 60 * 1000;
