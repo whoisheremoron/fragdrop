@@ -1874,25 +1874,17 @@ function _reelCell(s){
 
 // Отрисовывает содержимое кейса
 function _renderContents(){
-  const RC_LABEL = {knife:'Нож',contraband:'Контрабанда',covert:'Тайное',classified:'Засекреченное',restricted:'Запрещённое',mil:'Промышленное',consumer:'Ширпотреб'};
   const grid = document.getElementById('case-contents');
   const skins = curCase.items.map(id => SKIN_MAP.get(id)).filter(Boolean);
-  const byRarity = {};
-  skins.forEach(s => { (byRarity[s.rarity] = byRarity[s.rarity]||[]).push(s); });
-  const order = ['knife','contraband','covert','classified','restricted','mil','consumer'];
-  let html = '';
-  for(const r of order){
-    if(!byRarity[r]) continue;
-    html += `<div class="cont-rarity-label" style="color:${RC[r]}">${RC_LABEL[r]||r}</div>`;
-    html += byRarity[r].map(s => `
-      <div class="cont-item r-${s.rarity}">
-        <img src="${getSkinImg(s)}" alt="${s.name}" loading="lazy"
-          onerror="this.onerror=null;this.src='${skinSVG(s).replace(/"/g,"'")}'">
-        <div class="cont-name">${s.name}</div>
-        <div class="cont-price" style="color:${RC[s.rarity]}">${fmt(s.price)}</div>
-      </div>`).join('');
-  }
-  grid.innerHTML = html;
+  // Сортируем по цене убыванию
+  skins.sort((a,b) => b.price - a.price);
+  grid.innerHTML = skins.map(s => `
+    <div class="ci r-${s.rarity}" style="--rc:${RC[s.rarity]}">
+      <img src="${getSkinImg(s)}" alt="" loading="lazy"
+        onerror="this.onerror=null;this.src='${skinSVG(s).replace(/"/g,"'").replace(/`/g,"'")}'" >
+      <div class="ci-name">${s.name}</div>
+      <div class="ci-price" style="color:${RC[s.rarity]}">${fmt(s.price)}</div>
+    </div>`).join('');
 }
 
 // ── SPIN — с анимацией рулетки ────────────────────────────────────────────
