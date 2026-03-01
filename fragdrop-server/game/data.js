@@ -1,6 +1,6 @@
 'use strict';
 
-function IMG(n){ return `https://cdn.cs.money/CS2/skins/render/512x384/${encodeURIComponent(n)}.png`; }
+function IMG(n){ return `https://cdn2.csgo.com/item/image/width=200/${encodeURIComponent(n)}.webp`; }
 
 const SKINS = [
   // ── Ножи ─────────────────────────────────────────────────────────────────

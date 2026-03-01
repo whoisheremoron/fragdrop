@@ -1296,20 +1296,15 @@ function caseSVG(name, color) {
   return svgToDataURL(svg);
 }
 
-// cs.money CDN — прямой URL по market_hash_name, без авторизации
-function _skinCDN(n) {
-  return 'https://cdn.cs.money/CS2/skins/render/512x384/' + encodeURIComponent(n) + '.png';
-}
 function getSkinImg(s) {
-  if (s.img) return s.img;
-  if (s.name) return _skinCDN(s.rarity === 'knife' ? '★ ' + s.name : s.name);
-  return skinSVG(s);
+  const n = s.img ? null : (s.rarity === 'knife' ? '★ ' + s.name : s.name);
+  return s.img || `https://cdn2.csgo.com/item/image/width=200/${encodeURIComponent(n)}.webp`;
 }
 
 // ═══════════════════════════════════════════════════════
 //  SKINS
 // ═══════════════════════════════════════════════════════
-const IMG = (n) => _skinCDN(n);
+const IMG = (n) => `https://cdn2.csgo.com/item/image/width=200/${encodeURIComponent(n)}.webp`;
 
 const SKINS = [
   // ══ KNIVES — Special rarity (жёлтые) ══
